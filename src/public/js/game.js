@@ -31,19 +31,61 @@ var hblocks = renderconfig.hblocks;
 
 var board = math.zeros(hblocks, wblocks);
 
-//The main SVG container for everything
+//The main SVG container for everything. Therefore to 
+//retain symettry the height is equal to the width. 
 var svg = d3.select(renderconfig.selector)
     .append("svg")
     .attr("width", renderconfig.width)
     .attr("height", renderconfig.height)
 
 
+//Board will take over the full size of the SVG container. 
 function drawBoard(){
-
+		for(var i = 0; i < wblocks; i++){
+          for(var j = 0; j < hblocks; j++){
+            drawsquare(i*square.length + 60, j*square.length,i + (j * wblocks))
+          }
+        }
 }
+
+
+//need to make sure that the objects are loaded before rendering. 
+$.ajax({
+    async: false,
+    url: "/js/objects.js",
+    dataType: "script"
+});
+
+var square = new Square(renderconfig.width / renderconfig.wblocks)
+
+function drawsquare(x,y, id){
+
+	var gobj = svg.append("g")
+	  .attr("class", "gobject")
+	  .attr("id", "gblock" + id)
+	 .attr("transform", "translate(" + x + "," + y + ")")
+
+
+	var block = gobj
+	  .append("rect")
+	  .attr("id", id)
+	  .attr("height", square.length)
+	  .attr("width", square.length)
+	  .attr("class", "block")
+	  .attr("id", "block"+id)
+	  .attr("fill", function(d){if(markovmodel.config.rules[id] != undefined){
+	    return markovmodel.config.rules.color
+	  }else{
+	    return "white"
+	  }})
+	  .attr("stroke", 'black')
+	  return block;
+}
+
 
 this.Start = function(){
 	console.log("Starting game.")
+	drawBoard();
 }
 
 this.Stop = function(){
