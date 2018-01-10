@@ -15,6 +15,8 @@ actions = [] an array of available actions assumes
 See the config.js to generate a base config. 
 */
 function MDP(states, actions, config){
+	  this.config = config;
+	  	console.log("MM is " + this.config.rules)
 
       // Game parameters and tracks. Most of these should eventually be turned into game parameters. 
       var observationlikelihood = config.settings.observationlikeliehood;

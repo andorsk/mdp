@@ -10,6 +10,7 @@
 		<script src="/libs/d3/d3.min.js"></script>
 		<script src="/libs/math.min.js"> </script>
 		<script src="/js/mdp.js"> </script>
+		<link rel="stylesheet" href="/css/simplegame.css">
 		<script src="/js/simplemdp.js"> </script>
 	</head>
 
@@ -18,10 +19,54 @@
 		 <h2> A very simple MDP model</h2>
 		 
 		 <div class="container" id="simplegamecontainer">
-			<div class="messagebox" id="simplemdpmessagebox"></div>
-			<div class="mdpgame d3" id="simplemdp">
+			<div class="messagebox" id="simplemdpmessagebox"><span id="message"></span></div>
+			<div class="mdpgame d3 game" id="simplemdp">
 			</div>
-		</div>
+
+			<div id="movebuttoncontainers"">
+				   <div id="option" class="movebutton">
+				       <input name="UpButton" 
+				           type="button" 
+				           value="Up" 
+				    />
+				   </div>
+				   <div id="option" class="movebutton">
+				       <input name="DownButton" 
+				              type="button" 
+				              value="Down" 
+				         />
+				    </div>
+				    <div id="option" class="movebutton">
+				        <input name="LeftButton" 
+				               type="button" 
+				               value="Left" 
+				         />
+				    </div>
+				    <div id="option" class="movebutton">
+				        <input name="RightButton" 
+				               type="button" 
+				               value="Right" 
+				              />
+				    </div>
+				    <div id="option" class="movebutton">
+				        <input name="MoveButton" 
+				               type="button" 
+				               value="Move" 
+				               onclick="game.ActionHandler('Move')" />
+				    </div>
+				    <div id="option" class="movebutton">
+				        <input name="IterateButton" 
+				               type="button" 
+				               value="Iterate! (10x)" 
+				               onclick="game.ActionHandler(10, 1)" />
+				    </div>
+				    <div id="option" class="movebutton">
+				        <input name="ResetButton" 
+				               type="button" 
+				               value="Reset" 
+				               onclick="game.ActionHandler('Reset') />
+				    </div>
+			</div>
 	</body>
 
 </html>
