@@ -1,4 +1,5 @@
-### Markov Decision Process Rendering Library and Game for Javascript and the Web
+<<<<<<< HEAD
+# Markov Decision Process Rendering Library and Game for Javascript and the Web
 
 #### Libaries 
 
@@ -14,3 +15,4 @@ You can download the src file with
 
 The main file is located in mdp.js. 
 
+=======
