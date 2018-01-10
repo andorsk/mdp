@@ -8,14 +8,43 @@ Required fields:
 
 Optional fields: 
 1. Rules
+2. Settings: ex. decay rate.
 */
-function Config(terminalnodes, birthnode, type, rules){
+
+defaultConfig = {
+	decayrate: .85,
+	observationlikeliehood: .33
+}
+function Config(terminalnodes, birthnode, type, rules = {}, settings = {}){
 	var terminalnodes, birthnode, type, rules
+
+	setDefaultsIfNotPresent(settings)
 
 	this.terminalnodes = terminalnodes;
 	this.birthnode = birthnode;
 	this.type = type;
 	this.rules = rules;
+	this.settings = settings;
+}
+
+Config.prototype.printConfig = function(){
+	console.log("Terminal nodes are : " + this.terminalnodes)
+	console.log("Birth Node is : " + this.birthnode)
+	console.log("Type is : " + this.type)
+	console.log("Rules are: " + this.rules)
+	console.log("Settings are " + this.settings);
+}
+
+function setDefaultsIfNotPresent(settings){
+	//set settings defaults
+	if (typeof settings.decayrate == 'undefined' || settings.decayrate == null ){
+		settings.decayrate = defaultConfig.decayrate
+	}
+
+	if (typeof settings.observationlikeliehood == 'undefined' || settings.observationlikeliehood == null ){
+		settings.observationlikeliehood = defaultConfig.observationlikeliehood
+	}
+
 }
 
 
