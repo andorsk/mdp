@@ -15,13 +15,15 @@ defaultConfig = {
 	decayrate: .85,
 	observationlikeliehood: .33
 }
-function Config(terminalnodes, birthnode, type, rules = {}, settings = {}){
+
+function Config(terminalnodes, birthnode, invalidnodes, type, rules = {}, settings = {}){
 	var terminalnodes, birthnode, type, rules
 
 	setDefaultsIfNotPresent(settings)
 
 	this.terminalnodes = terminalnodes;
 	this.birthnode = birthnode;
+	this.invalidnodes = invalidnodes;
 	this.type = type;
 	this.rules = rules;
 	this.settings = settings;
@@ -30,6 +32,7 @@ function Config(terminalnodes, birthnode, type, rules = {}, settings = {}){
 Config.prototype.printConfig = function(){
 	console.log("Terminal nodes are : " + this.terminalnodes)
 	console.log("Birth Node is : " + this.birthnode)
+	console.log("Invalid Nodes are  " + this.invalidnodes)
 	console.log("Type is : " + this.type)
 	console.log("Rules are: " + this.rules)
 	console.log("Settings are " + this.settings);

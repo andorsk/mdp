@@ -16,6 +16,7 @@ $(document).ready(function(){
 	//Markov Settings
 	var terminalnodes = [1,2]
 	var birthnodes = [7]
+	var invalidnodes = []
 	var type = "grid"
     var settings =  {"decayrate": .85, "observationlikeliehood": .33}
 	var rules =  {
@@ -24,6 +25,23 @@ $(document).ready(function(){
        5: {"index": 3,"action": "invalid", "color": "grey"}, 
        7: {"index": 7,"action": "lose", "color": "red", "reward": -1}
    }
+
+   //Policies can be uploaded by a config or can be generated through iteration. In this case we've uploaded a policy. 
+   //You can encode the actions with a mapping if that is preferable. 
+   var samplepolicy = {
+    0: 'Right',
+    1: 'Right',
+    2: 'Right',
+    3: 'Left',
+    4: 'Up',
+    6: 'Up',
+    7: 'Up',
+    8: 'Up',
+    9: 'Left',
+    10: 'Up',
+    11: 'Left'
+ 	}  
+
     //load config with ajax request.
 	$.ajax({
 	    async: false,
@@ -31,7 +49,7 @@ $(document).ready(function(){
 	    dataType: "script"
 	});
 
-	conf = new Config(terminalnodes, birthnodes, type, rules, settings)
+	conf = new Config(terminalnodes, birthnodes, invalidnodes, type, rules, settings)
 	console.log("Staring Simple MDP");
 	markovmodel = new MDP([1,2], [1,2], conf)
 	markovmodel = markovmodel.New()

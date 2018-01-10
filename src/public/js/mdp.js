@@ -16,7 +16,7 @@ See the config.js to generate a base config.
 */
 function MDP(states, actions, config){
 	  this.config = config;
-	  	console.log("MM is " + this.config.rules)
+	  console.log("MM is " + this.config.rules)
 
       // Game parameters and tracks. Most of these should eventually be turned into game parameters. 
       var observationlikelihood = config.settings.observationlikeliehood;
@@ -41,7 +41,7 @@ function MDP(states, actions, config){
 
       // Decay rate is also called the dicount factor. Incrase this to increase the weight of past values in the value iteration cycle. 
       var decayrate = config.settings.decayrate;
-
+  	 
        /*
       Initalize the Transition matrix and the Q matrix
       */
