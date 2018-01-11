@@ -36,6 +36,7 @@ function loadScripts(){
     '/js/config.js',
     '/js/game.js',
     '/js/objects.js',
+    '/js/agents.js',
     '/js/valueiteration.js',
     '/js/gamelisteners.js'
   ]
@@ -47,7 +48,6 @@ function loadScripts(){
 }
   function registerScript(url){
     loadedscripts[url] = "true";
-    console.log("finished loading libary " + url);
   }
 
   //checks if script is loaded. if not, it will hold to a timing pattern until it is. timeout is set default to 3 sec.

@@ -15,13 +15,13 @@ actions = [] an array of available actions assumes
 All history functions are used for development. No production. 
 See the config.js to generate a base config. 
 */
-function MDP(states, actions, config){
+function MDP(states, actions, agents, config){
 
 	  this.config = config;
 	  this.states = states;
 	  this.actions = actions; 
-	  console.log("MM is " + this.config.rules)
-
+	  this.agents = agents; 
+	  
       // Game parameters and tracks. Most of these should eventually be turned into game parameters. 
       var observationlikelihood = config.settings.observationlikeliehood;
       var turn = 0;
@@ -59,9 +59,6 @@ function MDP(states, actions, config){
 
       // Decay rate is also called the dicount factor. Incrase this to increase the weight of past values in the value iteration cycle. 
       var decayrate = config.settings.decayrate;
-
-      // A finite set of agents. 
-      var agents = []; 
 
       //Joint actions and observations are the shared actions and observations by the interation of the agents. 
   	  var jointactions; 

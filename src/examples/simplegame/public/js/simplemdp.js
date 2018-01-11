@@ -58,7 +58,10 @@ $(document).ready(function(){
 	var states = createStates(12);
 	var actions = createActions();
 
-	markovmodel = new MDP(states, actions, conf)
+	waitUntilScriptLoaded("/js/agents.js");
+	var agents = createAgents(1, actions);
+
+	markovmodel = new MDP(states, actions, agents, conf)
 	markovmodel = markovmodel.New()
 	console.log("Created the Markov Model")
 
@@ -70,6 +73,15 @@ $(document).ready(function(){
 });
 
 
+//create agents helper. In this case all agents will have the same actionset. (down, left, right, up)
+function createAgents(num, actions){
+	var agents = []
+	for(var i = 0; i < num; i++){
+		var agent = new Agent(id = i, name = i, actionset = actions)
+		agents.push(agent);
+	}
+	return agents;
+}
 
 //"Helper functions to pass states"
 function createStates(num){
@@ -93,11 +105,16 @@ function createActions(){
 
 //TO DELETE
 function MoveUp(){
-	console.log("UP")
+	console.log("up")
 } 
 function MoveDown(){
-	console.log("DOWN")
+	console.log("down")
 }
+
+function confirmRegistered(){
+	console.log("registered ")
+}
+
 function MoveLeft(){
 
 }

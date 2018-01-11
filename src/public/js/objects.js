@@ -19,5 +19,4 @@
  	this.name = name;
  	this.callback = callback; 
  	this.description = description;
- 	return callback();  
  }
