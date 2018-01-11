@@ -39,9 +39,29 @@ function MDP(states, actions, config){
       // QMatrix denotes the probability for each transition. It is the estimated of the future value..  
       var qmatrix;
 
+      //The observation function is the likeliehood of observing o when action a is taken to transitoin to s'.
+      var observationmatrix; 
+
+      /*A belief state is a probability distribution over states 
+      that summarize the knowledge of the agents of a given point.
+	  It is updated via Bayesian logic.
+      The belief state matrix is the probability of a the next belief of b' given a belief and an action. 
+      */ 
+      var believestatematrix;
+
       // Decay rate is also called the dicount factor. Incrase this to increase the weight of past values in the value iteration cycle. 
       var decayrate = config.settings.decayrate;
-  	 
+
+      // A finite set of agents. 
+      var agents = []; 
+
+      //Joint actions and observations are the shared actions and observations by the interation of the agents. 
+  	  var jointactions; 
+  	  var jointobservations;
+
+  	  //Messsage are the sum of atomic messages sent by agent i 
+  	  var messages = []
+  	  
        /*
       Initalize the Transition matrix and the Q matrix
       */
@@ -53,6 +73,11 @@ function MDP(states, actions, config){
           }
 
           function initQMatrix(){
+             qmatrix = [new Array(states.length),new Array(actions.length),new Array(states.length)]
+             qmatrix = fill(qmatrix, 0)
+          }
+
+          function initObservationMatrix(){
              qmatrix = [new Array(states.length),new Array(actions.length),new Array(states.length)]
              qmatrix = fill(qmatrix, 0)
           }
