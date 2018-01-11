@@ -11,9 +11,20 @@ Optional fields:
 2. Settings: ex. decay rate.
 */
 
+
+var OPTIMIZATIONTYPES = Object.freeze({
+	1: "maxit", //run for x amount of iteration
+	2: "abstol", //run until error rate reaches close to zero. 
+	3: "reltol", //when the realtive improvement starts to decrease
+	4: "combination" //combination of reltol and maxit. 
+})
+
+
+
 defaultConfig = {
 	decayrate: .85,
-	observationlikeliehood: .33
+	observationlikeliehood: .33,
+	optimtype: OPTIMIZATIONTYPES[4]
 }
 
 function Config(terminalnodes, birthnode, invalidnodes, type, rules = {}, settings = {}){

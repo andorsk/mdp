@@ -1,9 +1,9 @@
 /*
 Main Markov Decision Libary mdp.js
 */
-$.getScript('/js/helpers.js', function(){
-	console.log("Loaded helpers.js")
-})
+
+var fullyloadedlibraries = {}
+
 
 /*
 Takes in a set of states and actions and initializes them with probability matrix and q matrix. 
@@ -12,10 +12,14 @@ To initalize: new MDP([args])
 states = [] an array of possible states
 actions = [] an array of available actions assumes 
 
+All history functions are used for development. No production. 
 See the config.js to generate a base config. 
 */
 function MDP(states, actions, config){
+
 	  this.config = config;
+	  this.states = states;
+	  this.actions = actions; 
 	  console.log("MM is " + this.config.rules)
 
       // Game parameters and tracks. Most of these should eventually be turned into game parameters. 
@@ -35,12 +39,15 @@ function MDP(states, actions, config){
        Size is state * action * state' 
        */
       var transitionmatrix;
-
+      var transitionmatrixhistory = [] //storing the transition matrix history for debugging purposes. 
+ 
       // QMatrix denotes the probability for each transition. It is the estimated of the future value..  
       var qmatrix;
+      var qmatrixhistory = [] //for debugging purposes. Should remain empty in production. 
 
       //The observation function is the likeliehood of observing o when action a is taken to transitoin to s'.
       var observationmatrix; 
+      var observationmatrixhistory = [];
 
       /*A belief state is a probability distribution over states 
       that summarize the knowledge of the agents of a given point.
@@ -48,6 +55,7 @@ function MDP(states, actions, config){
       The belief state matrix is the probability of a the next belief of b' given a belief and an action. 
       */ 
       var believestatematrix;
+      var beliefstatehistory = []
 
       // Decay rate is also called the dicount factor. Incrase this to increase the weight of past values in the value iteration cycle. 
       var decayrate = config.settings.decayrate;
@@ -61,7 +69,7 @@ function MDP(states, actions, config){
 
   	  //Messsage are the sum of atomic messages sent by agent i 
   	  var messages = []
-  	  
+
        /*
       Initalize the Transition matrix and the Q matrix
       */

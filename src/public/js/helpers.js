@@ -1,4 +1,6 @@
 
+ var loadedscripts = {};
+
  //fill helper for multi deminsional arrays. fills it with val.
  function fill(mat, val){
    for(var i = 0; i < mat.length; i++){
@@ -28,28 +30,63 @@
     }
     return context[func].apply(context, args);
   }
+  //Load Scripts required to get all the necessary javascript scripts loaded. Better way of handling this later. 
+function loadScripts(){
+  var scripts = [
+    '/js/config.js',
+    '/js/game.js',
+    '/js/objects.js',
+    '/js/valueiteration.js',
+    '/js/gamelisteners.js'
+  ]
+
+  for(var i =0; i < scripts.length; i++){
+    var script = scripts[i];
+    loadScript(script, registerScript)
+  }
+}
+  function registerScript(url){
+    loadedscripts[url] = "true";
+    console.log("finished loading libary " + url);
+  }
+
+  //checks if script is loaded. if not, it will hold to a timing pattern until it is. timeout is set default to 3 sec.
+  //Note: For now I just force load of url if it is not loaded synchronously. 
+  function waitUntilScriptLoaded(url){
+    var defaultTimeout = 3000;
+    if(isScriptLoaded(url)){
+      return;
+    } else{
+        console.log("Forcing load of URL" + url);
+        loadURLSynchronously(url);
+      }
+    } 
+  
+
+  function loadURLSynchronously(url){
+    $.ajax({
+      async: false,
+      url: url,
+      dataType: "script"
+  });
+  }
+
+  function isScriptLoaded(url){
+    if(url in loadedscripts){ 
+      return true
+    } else{
+      return false;
+    }
+  }
+
   /**
   Load the javascript first by the url. 
   **/
   function loadScript(url, callback){
-
-    var script = document.createElement("script")
-    script.type = "text/javascript";
-
-    if (script.readyState){  //IE
-        script.onreadystatechange = function(){
-            if (script.readyState == "loaded" ||
-                    script.readyState == "complete"){
-                script.onreadystatechange = null;
-                callback();
-            }
-        };
-    } else {  //Others
-        script.onload = function(){
-            callback();
-        };
-    }
-
-    script.src = url;
-    document.getElementsByTagName("head")[0].appendChild(script);
-}
+    $.ajax({
+      url: url,
+      dataType: "script",
+    }).done(function(){
+      callback(url);
+    });
+  }
