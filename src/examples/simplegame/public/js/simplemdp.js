@@ -3,6 +3,22 @@ var game;
 var markovmodel; 
 var conf; 
 
+//Policies can be uploaded by a config or can be generated through iteration. In this case we've uploaded a policy. 
+//You can encode the actions with a mapping if that is preferable. 
+var samplepolicy = {
+0: 1,
+1: 2,
+2: 3,
+3: 2,
+4: 1,
+6: 4,
+7: 3,
+8: 4,
+9: 10,
+10: 11,
+11: 7
+	}  
+
 
 $(document).ready(function(){
 	//start to asynchonously load all the scripts in the order presented in the helper function. 
@@ -19,7 +35,7 @@ $(document).ready(function(){
 	//Markov Settings
 	var terminalnodes = [1,2]
 	var birthnodes = [8]
-	var invalidnodes = []
+	var invalidnodes = {5: "true"}
 	var type = "grid"
     var settings =  {"decayrate": .85, "observationlikeliehood": .33, "learningrate": .1} 
 	var rules =  {
@@ -28,22 +44,6 @@ $(document).ready(function(){
        5: {"index": 3,"action": "invalid", "color": "grey"}, 
        7: {"index": 7,"action": "lose", "color": "red", "reward": -1}
    }
-
-   //Policies can be uploaded by a config or can be generated through iteration. In this case we've uploaded a policy. 
-   //You can encode the actions with a mapping if that is preferable. 
-   var samplepolicy = {
-    0: 1,
-    1: 2,
-    2: 3,
-    3: 2,
-    4: 1,
-    6: 4,
-    7: 3,
-    8: 4,
-    9: 10,
-    10: 11,
-    11: 7
- 	}  
 
  	/**
  	The waitUtilScriptLoaded checks and makes sure that the necessary scripts are loaded. The program will try and load them 
@@ -72,8 +72,14 @@ $(document).ready(function(){
 
 	var statepolicy =  policyIDToStateMapping(samplepolicy, states);
 	var tick = 0; 
+
+	//agent update policy	
 	setInterval(function(){
-		markovmodel.updateAgentsPositionByPolicy(statepolicy);	
+		//markovmodel.updateAgentsPositionByStateSpacePolicy(statepolicy);	
+		for(var i = 0; i < agents.length; i++){
+			var ind = Math.floor(Math.random() * agents[i].actionset.length) 
+			agents[i].actionset[ind].action(game, agents[i]); //right now need to pass itself. should not need to do htis.
+		}
 		game.updateMarkovModel(markovmodel)
 		game.Update()}, 1000)
 });
@@ -88,11 +94,9 @@ function MoveAgents(markovmodel){
 	var ret = []
 	for(var i = 0; i < agents.length; i++){
 		var agent = agents[i];
-		console.log("Old state was " + agent.getLastState().id)
 		var id = agent.getLastState().id
 		var newid = id >= states.length - 1 ? 0  : id + 1
 		agent.addNextState(states[newid])
-		console.log("New state is " + agent.getLastState().id)
 		ret.push(agent)
 	}
 	markovmodel.updateAgents(agents)
@@ -103,11 +107,8 @@ function policyIDToStateMapping(policy, states){
 	for(key in policy){
 		var s1 = key
 		var s2 = policy[key]
-		console.log("Preparing to move from " + s1 + " to " + s2)
 		ret[JSON.stringify(states[s1])] = states[s2]; 
-		console.log("State " + states[s1].id + " goes to " + states[s2].id)
 	}
-	console.log("Ret" + Object.keys(ret).length)
 	return ret;
 }
 
@@ -115,7 +116,7 @@ function policyIDToStateMapping(policy, states){
 function createAgents(num, actions, states){
 	var agents = []
 	for(var i = 0; i < num; i++){
-		var agent = new Agent(id = i, name = i, actionset = actions)
+		var agent = new Agent(id = i, name = i, actionset = actions, config = {"action-error": .25})
 		agent.addState(states[conf.birthnode[0]], 0); 
 		agents.push(agent);
 	}
@@ -126,7 +127,6 @@ function createAgents(num, actions, states){
 function createStates(num){
 	var ret = []
 	for(var id = 0; id< num; id++){
-		console.log("Created state: " + id)
 		var state = new State(id, id, null, "State " + id);
 		ret.push(state);
 	}
@@ -139,25 +139,101 @@ function createActions(){
 	var a2 = new Action(2, "Down", MoveDown, "Agent will move down upon this action");
 	var a3 = new Action(3, "Left", MoveLeft, "Agent will move left upon this action");
 	var a4 = new Action(4, "Right", MoveRight, "Agent will move right upon this action");
-	return [a1, a2, a3, a4];
+	return [a1,a2,a3,a4]
 }
 //Note: special conditions will be handeled later.
 
-//TO DELETE
-function MoveUp(){
-	console.log("up")
+//Describe Agent Actions
+function MoveToStart(agent){
+	agent.addNextState(markovmodel.states[markovmodel.config.birthnode[0]], 1)
+}
+
+
+/**
+Agent actions are tied to the game. May be also put into the game space. 
+*/
+function MoveUp(game, agent){
+		console.log("Agent " + agent.name + " moving up");
+      	var state = agent.getLastState();
+        var states = game.markovmodel.states;
+        var wblocks = game.renderconfig.wblocks;
+        var targetstate = state.id - wblocks;
+        if(state.id < wblocks || !validBlock(targetstate)){
+          console.log("Cannot move above this point.")
+          return;
+        }
+		agent.addNextState(states[targetstate], 1); //maove a tick up and add the next state.     
+}
+
+/*
+Move Down
+*/
+function MoveDown(game, agent){
+    	console.log("Agent " + agent.name + " moving down");
+
+      	var state = agent.getLastState();
+        var states = game.markovmodel.states;
+        var wblocks = game.renderconfig.wblocks;
+        var hblocks = game.renderconfig.hblocks; 
+        var targetstate = state.id + wblocks;
+        if(state.id > ((hblocks - 1) * wblocks) - 1 || !validBlock(targetstate)){// || !validBlock(targetstate)){
+          console.log("Cannot move below this point.")
+          return;
+        }
+		agent.addNextState(states[targetstate], 1); //maove a tick up and add the next state.     
+}
+/*
+Move agent to the right. 
+*/
+function MoveRight(game, agent){
+    	console.log("Agent " + agent.name + " moving right");
+
+      	var state = agent.getLastState();
+        var states = game.markovmodel.states;
+        var wblocks = game.renderconfig.wblocks;
+        var targetstate = state.id + 1;
+        if(onRight(state.id, wblocks) || !validBlock(targetstate)){
+          console.log("Cannot move above this point.")
+          return;
+        }
+		agent.addNextState(states[targetstate], 1); //maove a tick up and add the next state.     
+}
+
+function onRight(blockid, wblocks){
+      if((blockid + 1) % wblocks == 0){
+          return true;
+        }
+        return false;
 } 
-function MoveDown(){
-	console.log("down")
+
+
+//These will directly adjust the Markov Model. 
+function MoveLeft(game, agent){
+    	console.log("Agent " + agent.name + " moving left");
+
+      	var state = agent.getLastState();
+        var states = game.markovmodel.states;
+        var wblocks = game.renderconfig.wblocks;
+        var targetstate = state.id - 1;
+        if(onLeft(state.id, wblocks) || !validBlock(targetstate)){
+          console.log("Cannot move left. Currently at " + state.id)
+          return;
+        }
+		agent.addNextState(states[targetstate], 1); //maove a tick up and add the next state.     
 }
 
-function confirmRegistered(){
-	console.log("registered ")
+function onLeft(blockid, wblocks){
+ if(blockid % wblocks == 0){
+  return true;
+}
+return false;
 }
 
-function MoveLeft(){
 
+function validBlock(stateid){
+    if(stateid in markovmodel.config.invalidnodes){
+      return false;
+    }
+    return true;
 }
-function MoveRight(){
 
-}
