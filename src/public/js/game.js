@@ -32,9 +32,17 @@ var ticks = 0; //ticks keep track of the overall state changes (time t); It will
     [8, 9,10,11]
  */
 var board = math.zeros(hblocks, wblocks);
-var agent2state = {} //maps the agents to a state with key: agent value: state .
+var agent2board = {}
+var board2state = {} //assumes one to one mapping between board position and state.
+var state2board = {} //for reverse lookup of state to  board. This returns a json stringified version of the state space.  
 var state2graphic = {} //maps each state to a d3 graphic object.
+var board2graphic = {} //easy access to graphic object from board index reference. 
 
+/**
+Note: Unless the state space or the agent space gets really really large having the extra mappings shouldn't be a problem.
+In a future version I will see if I can do this  with less memory. 
+Most of these are for maintaining the relationship between graphics, state spaces, and agents in some order. 	
+**/
 
 //The main SVG container for everything. Therefore to 
 //retain symettry the height is equal to the width. 
@@ -50,33 +58,31 @@ function drawBoard(){
 		if(wblocks * hblocks != markovmodel.states.length){
 			alert("Please make sure that you specify the wblocks * hblocks = to the total states.")
 		}
-		
-		console.log("Rendering board with " + wblocks + ":" + hblocks) 
+
 		for(var i = 0; i < wblocks; i++){
           for(var j = 0; j < hblocks; j++){
-            drawsquare(i*square.width, j*square.height,i + (j * wblocks))
+          		var ind = ((i * (wblocks -1)) + j)
+          		var state = markovmodel.states[ind];
+          		board2state[ind] = state;
+          		state2board[JSON.stringify(state)] = ind; //state reference is the index to the states array. 
+            	drawsquare(i*square.width, j*square.height,i + (j * wblocks), state)		
           }
         }
 }
 
 
-//need to make sure that the objects are loaded before rendering. 
-$.ajax({
-    async: false,
-    url: "/js/objects.js",
-    dataType: "script"
-});
 
 var square = new Rectangle((renderconfig.width / renderconfig.wblocks), (renderconfig.height / renderconfig.hblocks))
 
-function drawsquare(x,y, id){
+function drawsquare(x,y, id, state){
 
 	var gobj = svg.append("g")
-	  .attr("class", "gobject")
+	  .attr("class", "gobject block")
 	  .attr("id", "gblock" + id)
 	  .attr("transform", "translate(" + x + "," + y + ")")
 
-	state2graphic[id] = gobj;
+	state2graphic[state] = gobj; //mapping from state to graphics for easy access;
+	board2graphic[id] = gobj; 
 
 	var block = gobj
 	  .append("rect")
@@ -94,19 +100,55 @@ function drawsquare(x,y, id){
 	  return block;
 	}
 	
-	//Uses the agent to state mapping. 
-	function drawagents(agentmapping){
-
+	//agent to board mapping. this must happen after the board has been initialized. 
+	function drawAgents(){
+		//get agents from markov model
+		for(var i = 0; i < markovmodel.agents.length; i++){
+			var currentAgentState = markovmodel.agents[i].state;
+			var graphic = state2graphic[currentAgentState];
+			agent2board[markovmodel.agents[i]] = state2board[currentAgentState] //could store agent id as well. 
+			drawagent(state2board[JSON.stringify(currentAgentState)], markovmodel.agents[i].getId())
+		}
 	}
 
   	//draw agent within the id of a block. Each agent will also have the block id they are attached to to make it easy to retrieve later. 
 	function drawagent(blockid, agentid){
-	   	var radius = 20
-	    svg.select("#gblock" + blockid).append("circle").attr("r", radius).attr("fill", "green").attr("cx", (square.length/2)).attr("cy", (square.length/2)).attr("id", "agent"+agentid).attr("class", "agent agent" +agentid).attr("currentblock", blockid).attr("opacity", 1)
+		var radius = 20
+	    svg.select("#gblock" + blockid).append("circle").attr("r", radius).attr("fill", "green").attr("cx", (square.width/2)).attr("cy", (square.height/2)).attr("id", "agent"+agentid).attr("class", "agent agent" +agentid).attr("currentblock", blockid).attr("opacity", 1)
 	    radius -= (radius * .5)
-	    svg.select("#gblock" + blockid).append("circle").attr("r", radius).attr("fill", "red").attr("cx", (square.length/2)).attr("cy", (square.length/2)).attr("class", "agent agent" +agentid).attr("opacity", 1)
+	    svg.select("#gblock" + blockid).append("circle").attr("r", radius).attr("fill", "red").attr("cx", (square.width/2)).attr("cy", (square.height/2)).attr("class", "agent agent" +agentid).attr("opacity", 1)
 	}
 
+
+	function clearBoard(){
+		$(".block").remove()
+	}
+
+	function clearAgents(){
+		$(".agent").remove()
+	}
+
+	//Updates the markov model and all the data. 
+	this.updateMarkovModel = function(mm){
+		markovmodel = mm;
+	}
+
+	//need to update this is the state space size changes. 
+	this.updateRenderConfig = function(rcnf){
+		renderconfig = rcnf; 
+	}
+	/**
+	Main update function. Update the board based upon the markov model;
+	Update function happens based upon the rate defined. 
+	**/
+	this.Update = function(){
+		ticks++;
+		console.log("Updating to tick " + ticks)
+		clearAgents() //clear the agents from the board;
+		clearBoard() 
+		drawBoard() //Need to redraw board in the case the markov state space changes. 
+		drawAgents() //Draw the agents. 
+	}
 
 /**
 ----------------------------------------------------------------------------------
@@ -142,6 +184,7 @@ function MoveDownAgentById(agentid){
 this.Start = function(){
 	console.log("Starting game." + this)
 	drawBoard();
+	drawAgents();
 	return this;
 }
 

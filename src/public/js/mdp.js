@@ -21,7 +21,7 @@ function MDP(states, actions, agents, config){
 	  this.states = states;
 	  this.actions = actions; 
 	  this.agents = agents; 
-	  
+
       // Game parameters and tracks. Most of these should eventually be turned into game parameters. 
       var observationlikelihood = config.settings.observationlikeliehood;
       var turn = 0;
@@ -90,6 +90,33 @@ function MDP(states, actions, agents, config){
           initTransitionMatrix();
           initQMatrix();
 
+      }
+
+      //This will use a policy to state mapping and implement a linked mapping between state1 and state 2. 
+      //mapping must be state to state. You can run a conversion in another method if you want to specify the 
+      //policy manually. 
+
+      //Each state must have an exisintg next state. If it does not the program will throw an error. 
+      this.updateAgentsPositionByPolicy = function(policy){
+      	//get the current state of the agent. 
+      	var agents = this.agents; 
+      	for(var i = 0; i < agents.length; i++){
+      		var agent = agents[i]
+      		var currentstate = agent.getLastState();
+      		if(!(currentstate in policy)){
+      			console.log("ERROR. State does not have an associative mapping.")
+      			return;
+      		}
+      		var nextstate = policy[currentstate];
+      		agent.addNextState(nextstate, 1); //push to the next state. 
+      		agents[i] = agent; //update agent 	
+      	}
+      	this.updateAgents(agents);
+      }
+
+      this.updateAgents = function(ag){
+      	agents = ag; 
+      	this.agents = ag;
       }
 
       function init(){

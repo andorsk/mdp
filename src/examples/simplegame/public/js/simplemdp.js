@@ -18,7 +18,7 @@ $(document).ready(function(){
 	}
 	//Markov Settings
 	var terminalnodes = [1,2]
-	var birthnodes = [7]
+	var birthnodes = [8]
 	var invalidnodes = []
 	var type = "grid"
     var settings =  {"decayrate": .85, "observationlikeliehood": .33, "learningrate": .1} 
@@ -59,7 +59,7 @@ $(document).ready(function(){
 	var actions = createActions();
 
 	waitUntilScriptLoaded("/js/agents.js");
-	var agents = createAgents(1, actions);
+	var agents = createAgents(1, actions, states);
 
 	markovmodel = new MDP(states, actions, agents, conf)
 	markovmodel = markovmodel.New()
@@ -70,14 +70,39 @@ $(document).ready(function(){
 	game  = new GridGameDrawer(markovmodel, renderconfig);
 	game = game.Start();
 
+	var tick = 0; 
+	setInterval(function(){
+		//agents = MoveAgents(markovmodel);
+		markovmodel.updateAgentsPositionByPolicy(policy);	
+		game.updateMarkovModel(markovmodel)
+		game.Update()}, 1000)
 });
 
 
+function MoveAgents(markovmodel){
+	var states = markovmodel.states;
+	var agents = markovmodel.agents;
+
+	var ret = []
+	for(var i = 0; i < agents.length; i++){
+		var agent = agents[i];
+		console.log("Old state was " + agent.getLastState().id)
+		var id = agent.getLastState().id
+		var newid = id >= states.length - 1 ? 0  : id + 1
+		agent.addNextState(states[newid])
+		console.log("New state is " + agent.getLastState().id)
+		ret.push(agent)
+	}
+	markovmodel.updateAgents(agents)
+}
+
+
 //create agents helper. In this case all agents will have the same actionset. (down, left, right, up)
-function createAgents(num, actions){
+function createAgents(num, actions, states){
 	var agents = []
 	for(var i = 0; i < num; i++){
 		var agent = new Agent(id = i, name = i, actionset = actions)
+		agent.addState(states[conf.birthnode[0]], 0); 
 		agents.push(agent);
 	}
 	return agents;
@@ -87,6 +112,7 @@ function createAgents(num, actions){
 function createStates(num){
 	var ret = []
 	for(var id = 0; id< num; id++){
+		console.log("Created state: " + id)
 		var state = new State(id, id, null, "State " + id);
 		ret.push(state);
 	}

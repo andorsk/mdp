@@ -19,7 +19,7 @@ Agent.prototype.setActionSet = function(actions){
 }
 
 Agent.prototype.setMessageCost = function(cost){
-	this.messagecost = cost;
+	this.messagecost = cost;[]
 }
 Agent.prototype.getId = function(){
 	return this.id;
@@ -36,15 +36,25 @@ Agent.prototype.setHistory = function(history){
 //This to be called to push a state WITH REGISTERED STATES and replaces the last state.
 //Assumes keys are chronological  
 Agent.prototype.replaceLastState = function(){
-	var lastkey = Object.keys(obj).reduce(function(a, b){ return obj[a] > obj[b] ? a : b });
-	this.history[lastkey] = this.state;
+	var lasttimestamp = Object.keys(this.history).reduce(function(a, b){ return this.history[a] > this.history[b] ? a : b });
+	this.history[lasttimestamp] = this.state;
+}
+
+//add a state with a timestep of t+1 to the highest timestep. 
+Agent.prototype.addNextState = function(state, timestep){
+	var lasttimestamp = Object.keys(this.history).reduce(function(a, b){ return this.history[a] > this.history[b] ? a : b });
+	this.addState(state, lasttimestamp + timestep)
+}
+
+Agent.prototype.getLastState = function(){
+	var lasttimestamp = Object.keys(this.history).reduce(function(a, b){ return this.history[a] > this.history[b] ? a : b });
+	return this.history[lasttimestamp];
 }
 
 //This should be the main called state function. 
 Agent.prototype.addState = function(state, t){
 	this.state = state;
 	this.history[t] = state;
-	console.log("Pushed new state to agent " + this.id)
 }
 
 Agent.prototype.setState = function(state){
