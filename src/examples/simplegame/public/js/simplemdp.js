@@ -32,17 +32,17 @@ $(document).ready(function(){
    //Policies can be uploaded by a config or can be generated through iteration. In this case we've uploaded a policy. 
    //You can encode the actions with a mapping if that is preferable. 
    var samplepolicy = {
-    0: 'Right',
-    1: 'Right',
-    2: 'Right',
-    3: 'Left',
-    4: 'Up',
-    6: 'Up',
-    7: 'Up',
-    8: 'Up',
-    9: 'Left',
-    10: 'Up',
-    11: 'Left'
+    0: 1,
+    1: 2,
+    2: 3,
+    3: 2,
+    4: 1,
+    6: 4,
+    7: 3,
+    8: 4,
+    9: 10,
+    10: 11,
+    11: 7
  	}  
 
  	/**
@@ -70,15 +70,17 @@ $(document).ready(function(){
 	game  = new GridGameDrawer(markovmodel, renderconfig);
 	game = game.Start();
 
+	var statepolicy =  policyIDToStateMapping(samplepolicy, states);
 	var tick = 0; 
 	setInterval(function(){
-		//agents = MoveAgents(markovmodel);
-		markovmodel.updateAgentsPositionByPolicy(policy);	
+		markovmodel.updateAgentsPositionByPolicy(statepolicy);	
 		game.updateMarkovModel(markovmodel)
 		game.Update()}, 1000)
 });
 
 
+
+//Move agents by one. mostly for testing. 
 function MoveAgents(markovmodel){
 	var states = markovmodel.states;
 	var agents = markovmodel.agents;
@@ -96,6 +98,18 @@ function MoveAgents(markovmodel){
 	markovmodel.updateAgents(agents)
 }
 
+function policyIDToStateMapping(policy, states){
+	var ret = {}
+	for(key in policy){
+		var s1 = key
+		var s2 = policy[key]
+		console.log("Preparing to move from " + s1 + " to " + s2)
+		ret[JSON.stringify(states[s1])] = states[s2]; 
+		console.log("State " + states[s1].id + " goes to " + states[s2].id)
+	}
+	console.log("Ret" + Object.keys(ret).length)
+	return ret;
+}
 
 //create agents helper. In this case all agents will have the same actionset. (down, left, right, up)
 function createAgents(num, actions, states){

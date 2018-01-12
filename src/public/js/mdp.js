@@ -103,11 +103,13 @@ function MDP(states, actions, agents, config){
       	for(var i = 0; i < agents.length; i++){
       		var agent = agents[i]
       		var currentstate = agent.getLastState();
-      		if(!(currentstate in policy)){
+      		if(!(JSON.stringify(currentstate) in policy)){
       			console.log("ERROR. State does not have an associative mapping.")
+      			console.log("JSON is " + JSON.stringify(currentstate))
       			return;
       		}
-      		var nextstate = policy[currentstate];
+      		var nextstate = policy[JSON.stringify(currentstate)];
+      		console.log("Moving from " + currentstate.id + " to " + nextstate.id)
       		agent.addNextState(nextstate, 1); //push to the next state. 
       		agents[i] = agent; //update agent 	
       	}
