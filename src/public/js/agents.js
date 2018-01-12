@@ -5,12 +5,15 @@ This creates a new agent.
 You can invoke multiple agents within an MDP problem. 
 The action set is the availble actions to a given agent. You can pass by reference 
 or the actual function. 
+
+The config can support multiple parameters. 
 */
-function Agent(id, name, actionset){
+function Agent(id, name, actionset, config = {}){
 	this.id = id;
 	this.name = name != null ? name : id;
 	this.time = 0;
 	this.history = {}; //history contains a map of t -> state
+	this.config = config; 
 	this.actionset = actionset;
 }
 

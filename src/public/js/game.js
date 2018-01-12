@@ -21,6 +21,9 @@ if(markovmodel == null || renderconfig == null ){
 	return
 }
 
+this.markovmodel = markovmodel;
+this.renderconfig = renderconfig;
+
 var wblocks = renderconfig.wblocks;
 var hblocks = renderconfig.hblocks;
 var ticks = 0; //ticks keep track of the overall state changes (time t); It will increment for each tickaction class. 

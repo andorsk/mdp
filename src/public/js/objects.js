@@ -14,9 +14,10 @@
  	this.object = object; //throw an object parameters such as location. 
  }
 
- function Action(id, name, callback, description = ""){
+ //Action is a action function tied to an agent.
+ function Action(id, name, action, description = ""){
  	this.id = id;
  	this.name = name;
- 	this.callback = callback; 
+ 	this.action = action; 
  	this.description = description;
  }

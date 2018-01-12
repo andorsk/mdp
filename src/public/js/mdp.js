@@ -97,7 +97,7 @@ function MDP(states, actions, agents, config){
       //policy manually. 
 
       //Each state must have an exisintg next state. If it does not the program will throw an error. 
-      this.updateAgentsPositionByPolicy = function(policy){
+      this.updateAgentsPositionByStateSpacePolicy = function(policy){
       	//get the current state of the agent. 
       	var agents = this.agents; 
       	for(var i = 0; i < agents.length; i++){
@@ -109,7 +109,6 @@ function MDP(states, actions, agents, config){
       			return;
       		}
       		var nextstate = policy[JSON.stringify(currentstate)];
-      		console.log("Moving from " + currentstate.id + " to " + nextstate.id)
       		agent.addNextState(nextstate, 1); //push to the next state. 
       		agents[i] = agent; //update agent 	
       	}
