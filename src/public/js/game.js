@@ -166,22 +166,6 @@ $(document).ready(function(){
 	})
 })
 
-function runFunction(val){
-	console.log("Attempting to execute function " + val)
-	executeFunctionByName(val, $(this))
-}
-
-function Up(agentid){
-	sendMessage("#simplemdpmessagebox", "Moving Agent Up")
-}
-
-function MoveUpAgentById(agentid){
-	sendMessage("#simplemdpmessagebox", "Moving Agent Up")
-}
-
-function MoveDownAgentById(agentid){
-	sendMessage("#simplemdpmessagebox", "Moving Agent Down")
-}
 
 
 this.Start = function(){
@@ -196,4 +180,97 @@ this.Stop = function(){
 }
 
 }
+
+/**
+AGENT ACTION FUNCTIONS FOR GRID BOARD
+*/
+var AgentGridActions = function(){};
+
+AgentActions();
+function AgentActions(){
+
+	AgentGridActions.MoveToStart = function(agent){
+		agent.addNextState(markovmodel.states[markovmodel.config.birthnode[0]], 1);	
+	}
+
+	AgentGridActions.MoveUp = function(game, agent){
+		console.log("Agent " + agent.name + " moving up");
+      	var state = agent.getLastState();
+        var states = game.markovmodel.states;
+        var wblocks = game.renderconfig.wblocks;
+        var targetstate = state.id - wblocks;
+        if(state.id < wblocks || !validBlock(targetstate)){
+          console.log("Cannot move above this point.")
+          return;
+        }
+		agent.addNextState(states[targetstate], 1); //maove a tick up and add the next state.     
+	}
+	AgentGridActions.MoveDown = function(game, agent){
+    	console.log("Agent " + agent.name + " moving down");
+
+      	var state = agent.getLastState();
+        var states = game.markovmodel.states;
+        var wblocks = game.renderconfig.wblocks;
+        var hblocks = game.renderconfig.hblocks; 
+        var targetstate = state.id + wblocks;
+        if(state.id > ((hblocks - 1) * wblocks) - 1 || !validBlock(targetstate)){// || !validBlock(targetstate)){
+          console.log("Cannot move below this point.")
+          return;
+        }
+		agent.addNextState(states[targetstate], 1); //maove a tick up and add the next state.     
+	}	
+
+	AgentGridActions.MoveRight = function(game, agent){
+    	console.log("Agent " + agent.name + " moving right");
+
+      	var state = agent.getLastState();
+        var states = game.markovmodel.states;
+        var wblocks = game.renderconfig.wblocks;
+        var targetstate = state.id + 1;
+        if(onRight(state.id, wblocks) || !validBlock(targetstate)){
+          console.log("Cannot move above this point.")
+          return;
+      }
+	agent.addNextState(states[targetstate], 1); //maove a tick up and add the next state.     
+	}
+
+    function onRight(blockid, wblocks){
+	      if((blockid + 1) % wblocks == 0){
+	          return true;
+	        }
+	        return false;
+	} 
+
+	AgentGridActions.MoveLeft = function(game, agent){
+	    	console.log("Agent " + agent.name + " moving left");
+
+	      	var state = agent.getLastState();
+	        var states = game.markovmodel.states;
+	        var wblocks = game.renderconfig.wblocks;
+	        var targetstate = state.id - 1;
+	        if(onLeft(state.id, wblocks) || !validBlock(targetstate)){
+	          console.log("Cannot move left. Currently at " + state.id)
+	          return;
+	        }
+			agent.addNextState(states[targetstate], 1); //maove a tick up and add the next state.     
+	}
+
+	function onLeft(blockid, wblocks){
+	 if(blockid % wblocks == 0){
+	  return true;
+	}
+	return false;
+	}
+
+
+    function validBlock(stateid){
+	    if(stateid in markovmodel.config.invalidnodes){
+	      return false;
+	    }
+	    return true;
+	}
+}
+
+	
+
 
