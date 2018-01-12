@@ -80,7 +80,9 @@ $(document).ready(function(){
 		//markovmodel.updateAgentsPositionByStateSpacePolicy(statepolicy);	
 		for(var i = 0; i < agents.length; i++){
 			var ind = Math.floor(Math.random() * agents[i].actionset.length) 
-			agents[i].actionset[ind].action(game, agents[i]); //right now need to pass itself. should not need to do htis.
+			agents[i].executeAction(.25, function(){
+				agents[i].actionset[ind].action(game, agents[i]);
+			}, {"game": game, "agent": agents[i]});
 		}
 		game.updateMarkovModel(markovmodel)
 		game.Update()}, 1000)

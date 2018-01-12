@@ -63,3 +63,30 @@ Agent.prototype.addState = function(state, t){
 Agent.prototype.setState = function(state){
 	this.state = state;
 }
+
+//Agent can have a noise factor associated with any action
+Agent.prototype.executeAction = function(noise, action, context){
+	if(Math.random() <= noise){
+		//choose new action
+		console.log("Noise!")
+		var newaction = action;
+		while(newaction == action){
+			newaction = this.chooseRandomAction()
+		}
+		action = newaction;
+	} 
+	action(context.game, context.agent);
+}
+
+Agent.prototype.chooseRandomAction = function(){
+	var index = Math.floor(Math.random() * this.actionset.length);
+	return this.actionset[index].action
+}
+/*
+There are a couple things to consider. Agents may have different policies. So each agent 
+can have a policy associated with it. 
+
+Each agent also has differnet actions. 
+*/
+
+
