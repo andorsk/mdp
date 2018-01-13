@@ -8,13 +8,14 @@ or the actual function.
 
 The config can support multiple parameters. 
 */
-function Agent(id, name, actionset, config = {}){
+function Agent(id, name, actionset, config = {}, mdp={}){
 	this.id = id;
 	this.name = name != null ? name : id;
 	this.time = 0;
 	this.history = {}; //history contains a map of t -> state
 	this.config = config; 
 	this.actionset = actionset;
+	this.mdp= mdp; //each agent needs to keep track of it's own value map and qmatrix. That is because in certain games agents can have differnet policies. 	
 }
 
 Agent.prototype.setActionSet = function(actions){
@@ -65,8 +66,8 @@ Agent.prototype.setState = function(state){
 }
 
 //Agent can have a noise factor associated with any action
-Agent.prototype.executeAction = function(noise, action, context){
-	if(Math.random() <= noise){
+Agent.prototype.executeAction = function(action, context){
+	if(Math.random() <= context.noise){
 		//choose new action
 		console.log("Noise!")
 		var newaction = action;
@@ -75,7 +76,7 @@ Agent.prototype.executeAction = function(noise, action, context){
 		}
 		action = newaction;
 	} 
-	action(context.game, context.agent);
+	action.action(context.game, context.agent);
 }
 
 Agent.prototype.chooseRandomAction = function(){

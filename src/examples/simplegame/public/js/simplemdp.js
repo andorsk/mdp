@@ -75,17 +75,24 @@ $(document).ready(function(){
 	var statepolicy =  policyIDToStateMapping(samplepolicy, states);
 	var tick = 0; 
 
+
 	//agent update policy	
 	setInterval(function(){
 		//markovmodel.updateAgentsPositionByStateSpacePolicy(statepolicy);	
 		for(var i = 0; i < agents.length; i++){
-			var ind = Math.floor(Math.random() * agents[i].actionset.length) 
-			agents[i].executeAction(.25, function(){
-				agents[i].actionset[ind].action(game, agents[i]);
-			}, {"game": game, "agent": agents[i]});
+		 updateGameModel(i);	
 		}
+	}, 1000)
+
+	function updateGameModel(i){
+		var ind = Math.floor(Math.random() * agents[i].actionset.length) 
+		var context =  {"game": game, "agent": agents[i]}
+		//execute action
+		agents[i].executeAction(agents[i].actionset[ind], context);
+		//update markov movel
 		game.updateMarkovModel(markovmodel)
-		game.Update()}, 1000)
+		game.Update()
+	}
 });
 
 
@@ -105,7 +112,12 @@ function MoveAgents(markovmodel){
 	}
 	markovmodel.updateAgents(agents)
 }
-
+/**
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$CREATION HELPERS$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+Can be deleted later if agents are supplied through config. 
+*/
 function policyIDToStateMapping(policy, states){
 	var ret = {}
 	for(key in policy){
