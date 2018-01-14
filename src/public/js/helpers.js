@@ -9,6 +9,22 @@
    return mat;
  }
 
+ 
+Array.prototype.insertIntoEach = function(val){
+     for(var i = 0; i < this.length; i++){
+      var copyOfMyArray = $.extend(true, [], val);   //need to make a copy or else array will update multiple points.   
+      this[i] = copyOfMyArray;
+     }
+}
+
+ //fill helper for multi deminsional arrays. fills it with val.
+ function zeroarray(size){
+   var arr = new Array(size)
+   for(var i = 0; i < arr.length; i++){
+     arr[i] = arr[i].fill(0)
+   }
+   return arr;
+ }
  //convert an index to a location on a board.
   function convertindextoloc(board, index){
         var rows = Math.floor(index / board.size()[1])
@@ -38,7 +54,6 @@ function loadScripts(){
     '/js/objects.js',
     '/js/agents.js',
     '/js/valueiteration.js',
-    '/js/gamelisteners.js'
   ]
 
   for(var i =0; i < scripts.length; i++){
@@ -62,7 +77,6 @@ function loadScripts(){
       }
     } 
   
-
   function loadURLSynchronously(url){
     $.ajax({
       async: false,

@@ -51,6 +51,9 @@ $(document).ready(function(){
  	*/
 	waitUntilScriptLoaded("/js/config.js");
 	settings.optimtype = OPTIMIZATIONTYPES[4]; //set the optimtype to combination;
+	settings.approx_method = APPROX_METHODS["Crawl"] //set the transition approximation method. crawl for smaller
+	//state spaces will work but if you get to a large state space you will need to use alternative approximation methods.. 
+
 	conf = new Config(terminalnodes, birthnodes, invalidnodes, type, rules, settings)
 	console.log("Staring Simple MDP");
 
@@ -62,11 +65,12 @@ $(document).ready(function(){
     var actions = createActions();
 
 	waitUntilScriptLoaded("/js/agents.js");
-	var agents = createAgents(1, actions, states);
+	var agents = createAgents(2, actions, states);
 
 	markovmodel = new MDP(states, actions, agents, conf)
-	markovmodel = markovmodel.New()
-	console.log("Created the Markov Model")
+//	markovmodel = markovmodel.New()
+	agents = markovmodel.attachMarkovModelToAllAgents(agents);
+	console.log("Created the Markov Model" + Object.keys(markovmodel))
 
 	//load game
 	game  = new GridGameDrawer(markovmodel, renderconfig);
@@ -87,6 +91,7 @@ $(document).ready(function(){
 	function updateGameModel(i){
 		var ind = Math.floor(Math.random() * agents[i].actionset.length) 
 		var context =  {"game": game, "agent": agents[i]}
+
 		//execute action
 		agents[i].executeAction(agents[i].actionset[ind], context);
 		//update markov movel
@@ -117,6 +122,7 @@ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$CREATION HELPERS$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 Can be deleted later if agents are supplied through config. 
+
 */
 function policyIDToStateMapping(policy, states){
 	var ret = {}
@@ -151,10 +157,11 @@ function createStates(num){
 
 //Helper function to create Actions. The actions are static. 
 function createActions(){
-	var a1 = new Action(1, "Up", AgentGridActions.MoveUp, "Agent will move up upon this action");
-	var a2 = new Action(2, "Down", AgentGridActions.MoveDown, "Agent will move down upon this action");
-	var a3 = new Action(3, "Left", AgentGridActions.MoveLeft, "Agent will move left upon this action");
-	var a4 = new Action(4, "Right", AgentGridActions.MoveRight, "Agent will move right upon this action");
-	return [a1,a2,a3,a4]
+	var a1 = new Action(0, "Up", AgentGridActions.MoveUp, "Agent will move up upon this action");
+	var a2 = new Action(1, "Down", AgentGridActions.MoveDown, "Agent will move down upon this action");
+	var a3 = new Action(2, "Left", AgentGridActions.MoveLeft, "Agent will move left upon this action");
+	var a4 = new Action(3, "Right", AgentGridActions.MoveRight, "Agent will move right upon this action");
+	var a5 = new Action(4, "StayPut", AgentGridActions.StayPut, "Agent willl stay put for this tick");
+	return [a1,a2,a3,a4,a5]
 }
 

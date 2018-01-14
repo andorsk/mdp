@@ -46,9 +46,27 @@ Agent.prototype.replaceLastState = function(){
 
 //add a state with a timestep of t+1 to the highest timestep. 
 Agent.prototype.addNextState = function(state, timestep){
-	var lasttimestamp = Object.keys(this.history).reduce(function(a, b){ return this.history[a] > this.history[b] ? a : b });
-	this.addState(state, lasttimestamp + timestep)
+	var lasttimestamp = Object.keys(this.history).reduce(function(a, b){ return this.history[a] > this.history[b] ? a : b });	
+	this.addState(state, lasttimestamp + timestep)	
 }
+
+//The act function will add the next state and also update the transition model
+//assumes a tick of 1. Can be 
+Agent.prototype.Act = function(state, action, stateprime){
+	this.addNextState(stateprime, 1);
+	this.updateTransitionModel(state, action, stateprime);
+}
+
+/*
+Updates the agents transition models. Need the indexed values of the matrix. 
+Alternative: Could rewrite the matrix as keys and then insert. 
+*/
+Agent.prototype.updateTransitionModel = function(state, action, stateprime){
+	var qmatrix = this.mdp.qmatrix.qmat;
+	var tmat = this.mdp.qmatrix.tmat;
+	tmat[state.id][action.id][stateprime.id] = tmat[state.id][action.id][stateprime.id] + 1;
+	
+}	
 
 Agent.prototype.getLastState = function(){
 	var lasttimestamp = Object.keys(this.history).reduce(function(a, b){ return this.history[a] > this.history[b] ? a : b });
@@ -67,6 +85,8 @@ Agent.prototype.setState = function(state){
 
 //Agent can have a noise factor associated with any action
 Agent.prototype.executeAction = function(action, context){
+	this.currentaction = action; //needed so that the action index can be queried later. 
+
 	if(Math.random() <= context.noise){
 		//choose new action
 		console.log("Noise!")

@@ -20,6 +20,13 @@ var OPTIMIZATIONTYPES = Object.freeze({
 })
 
 
+//approximation methods for transition probabilies. Enum. 
+var APPROX_METHODS = Object.freeze({
+	"MCMC": StochasticApproimationMethods.MCMC,
+	"Crawl": StochasticApproimationMethods.Crawl,
+	"Prune": StochasticApproimationMethods.Prune
+})
+
 
 defaultConfig = {
 	decayrate: .85,

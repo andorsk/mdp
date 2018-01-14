@@ -67,20 +67,19 @@ function MDP(states, actions, agents, config){
   	  //Messsage are the sum of atomic messages sent by agent i 
   	  var messages = []
 
-       /*
-      Initalize the Transition matrix and the Q matrix
+  	   /*
+        Initalize the Transition matrix and the Q matrix
       */
       function initProbabilityMatrices(){
        	
           function initTransitionMatrix(){
-             transitionmatrix = [new Array(states.length),new Array(actions.length),new Array(states.length)]
-             transitionmatrix = fill(transitionmatrix,0)
+             transitionmatrix = math.zeros(states.length, states.length)
           }
 
           function initQMatrix(){
-             qmatrix = [new Array(states.length),new Array(actions.length),new Array(states.length)]
-             qmatrix = fill(qmatrix, 0)
-          }
+             qmatrix = new QMatrix(states, actions);
+             console.log("Initalized QMat with " + qmatrix.tmat)
+            }
 
           function initObservationMatrix(){
              qmatrix = [new Array(states.length),new Array(actions.length),new Array(states.length)]
@@ -92,10 +91,20 @@ function MDP(states, actions, agents, config){
 
       }
 
+
+       this.attachMarkovModelToAllAgents = function(agents){
+      	for(var i = 0; i < agents.length; i++){
+      	     var agent = agents[i]
+      		 agent.mdp = this;
+      		 agents[i] = agent; 
+      	}
+      	this.agents = agents;
+      	return agents;
+      }
+
       //This will use a policy to state mapping and implement a linked mapping between state1 and state 2. 
       //mapping must be state to state. You can run a conversion in another method if you want to specify the 
       //policy manually. 
-
       //Each state must have an exisintg next state. If it does not the program will throw an error. 
       this.updateAgentsPositionByStateSpacePolicy = function(policy){
       	//get the current state of the agent. 
@@ -120,16 +129,74 @@ function MDP(states, actions, agents, config){
       	this.agents = ag;
       }
 
-      function init(){
-      	console.log("Initializing Markov Matrix");
-      	initProbabilityMatrices();
-      	console.log("Initialization is done.")
-      }
 
+  	console.log("Initializing Markov Matrix");
+  	initProbabilityMatrices();
+  	console.log("Initialization is done.")
+  	//this.attachMarkovModelToAllAgents(this.agents);
+  	console.log("Attaching models to agents.")
+  	this.qmatrix = qmatrix;
+  	this.transitionmatrix = transitionmatrix;
+  	this.believestatematrix = believestatematrix; 
 
-      this.New = function(){
-      	init();
-      	return this;
-      }
+	this.qmatrixhistory = qmatrixhistory;
+  	this.transitionmatrixhistory = transitionmatrixhistory;
+  	this.beliefstatehistory = beliefstatehistory; 
+
+  	this.joinactions = jointactions;
+  	this.jointobservations = jointobservations;
+      
+}
+
+function QMatrix(statespace, actionspace){
+	  this.qmat = generateNestedArray(statespace, actionspace)
+	  this.tmat = this.qmat; //this 
+
+	  //needs to be written as recurive function using a list. not too happy with this but it'll do the job for now. 
+  	  function generateNestedArray(statespace, actionspace){
+  	  	var sarray = new Array(statespace.length)
+  	  	var aarr = new Array(actionspace.length)
+  	  	var sprime = new Array(statespace.length)
+  	  	sprime.fill(0)
+  	  	aarr.insertIntoEach(sprime)
+  	 	sarray.insertIntoEach(aarr)
+  	 	return sarray;
+  	  }
+
+  	  //Updates the qmatrix given a state, action, and stateprime
+  	  this.updateMatrix = function(state, action, stateprime, val){
+  	  	this.mat[state.id][action.id][stateprime.id] = val;
+  	  }
+
+  	  this.getValue = function(state,action, stateprime){
+  	  	return this.mat[state.id][action.id][stateprime.id]
+  	  }
+    
+}
+
+//approximation methods for transition probabilies. Enum. 
+var APPROX_METHODS = Object.freeze({
+	"MCMC": StochasticApproimationMethods.MCMC,
+	"Crawl": StochasticApproimationMethods.Crawl,
+	"Prune": StochasticApproimationMethods.Prune
+})
+
+/*
+When the state space gets really large then a crawl won't make sense to use for transition approximations (or at least a naive crawler).
+*/
+function StochasticApproimationMethods(){
+
+	//Monte Carlo Simulation to Estimate transition parameters. 
+	StochasticApproimationMethods.MCMC = function(){
+
+	}
+
+	//Brute force method of approximating parameters via a crawler. Each time an agent moves it will update transition matrix. 
+	StochasticApproimationMethods.Crawl = function(){
+
+	}
+	
+	//Prunes a decision tree to intelligently approximate methods. 
+	StochasticApproimationMethods.Prune = function()
 
 }

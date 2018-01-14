@@ -34,6 +34,14 @@ This library will eventually include examples for Dec-POMDP and Dec-POMDP-COM.
 1. Value Iteration
 2. Q Learning
 
+### Transition Approximation
+
+There are three methods for transition approximation that will originally be offered. 
+
+1. Crawl (Agent will randomly crawl and generate probability matrix) 
+2. MCMC (Monte Carlo Simulation)
+3. Tree Pruning
+
 ### To Run
 
 You can download the src file with
