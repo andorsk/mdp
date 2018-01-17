@@ -69,7 +69,7 @@ function E(markovmodel, state){
 			probablitysum += qmatrix[state.id][i][j] 	
 			if(ex > maxexp){
 				maxexp = ex;
-				actionreturned = markovmodel.actions[i].name
+				actionreturned = markovmodel.actions[i]
 			} 
 
 		}

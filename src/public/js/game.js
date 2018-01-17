@@ -94,8 +94,8 @@ function drawsquare(x,y, id, state){
 	  .attr("width", square.width)
 	  .attr("class", "block")
 	  .attr("id", "block"+id)
-	  .attr("fill", function(d){if(id in markovmodel.config.rules){
-	    return markovmodel.config.rules[id].color
+	  .attr("fill", function(d){if(id.toString() in markovmodel.config.rules){
+	    return markovmodel.config.rules[id.toString()].color
 	  }else{
 	    return "white"
 	  }})

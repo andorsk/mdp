@@ -26,23 +26,50 @@ $(document).ready(function(){
 
 	//Render Config Settings	
 	var renderconfig = {
-		wblocks: 4,
-		hblocks: 3,
+		wblocks: 10,
+		hblocks: 10,
 		width: 500,
 		height: 300,
 		selector: "#simplegamecontainer" //this div to insert the svg container in. 
 	}
 	//Markov Settings
-	var terminalnodes = [3,7]
-	var birthnodes = [8]
-	var invalidnodes = {5: "true"}
+	var terminalnodes = [99,98]
+	var birthnodes = [0]
+	var invalidnodes = {5: "true", 8: "true"}
 	var type = "grid"
     var settings =  {"decayrate": .85, "observationlikeliehood": .33, "learningrate": .1, "approx_method": "Crawl", "epsilon": .2} 
 	var rules =  {
-       8: {"index": 8,"action": "start", "color": "blue"}, 
-       3: {"index": 3,"action": "win", "color": "green", "reward": 1}, 
+       0: {"index": 0,"action": "invalid", "color": "blue"}, 
        5: {"index": 3,"action": "invalid", "color": "grey"}, 
-       7: {"index": 7,"action": "lose", "color": "red", "reward": -1}
+       8: {"index": 8,"action": "start", "color": "grey"}, 
+       99: {"index": 99,"action": "win", "color": "green", "reward": 1}, 
+       98: {"index": 98,"action": "lose", "color": "red", "reward": -1}
+   }
+   var inv = genRandomInvalidNodes(20);
+   rules = inv[0]
+   invalidnodes = inv[1] 
+   console.log("New Ingalid Nodes are " + rules)
+   
+   function genRandomInvalidNodes(num){
+  	var invalidnodes = {}
+   	var invalidlist = {}
+   		
+  	for(var i = 0; i < num; i++){
+   		
+   		var ind = Math.floor(Math.random() * (renderconfig.wblocks * renderconfig.hblocks));
+   		if(birthnodes.indexOf(ind) > -1 || terminalnodes.indexOf(ind) > -1){
+   			console.log("Already there.")
+   			continue;
+   		}
+   		invalidnodes[parseInt(ind)] ={"index": parseInt(ind), "action":"invalid", "color": "grey"}
+   		invalidlist[parseInt(ind)] = "true"
+   	}
+
+   	   invalidnodes[0] = {"index": 0,"action": "start", "color": "blue"}, 
+       invalidnodes[99] =  {"index": 99,"action": "win", "color": "green", "reward": 1}, 
+       invalidnodes[98] =  {"index": 98,"action": "lose", "color": "red", "reward": -1}
+   	console.log("invalid nodes are " + JSON.stringify(invalidnodes))
+   	return [invalidnodes, invalidlist]
    }
 
  	/**
@@ -58,7 +85,7 @@ $(document).ready(function(){
 	console.log("Staring Simple MDP");
 
 	waitUntilScriptLoaded("/js/objects.js");
-	var states = createStates(12);
+	var states = createStates(100);
 
 	//Game.js has the actinos so we need to load it.
 	waitUntilScriptLoaded("/js/game.js");
@@ -70,6 +97,7 @@ $(document).ready(function(){
 	//generate the base markov model. 
 	markovmodel = new MDP(states, actions, agents, conf) 
 	var referencemodel = markovmodel.clone();
+	markovmodel.referencemodel = referencemodel;
 	//for each agent attach a mdp model;
 	for(var i = 0; i < agents.length; i++){
 		markovmodel.agents[i].mdp = markovmodel.clone(); //cloning will attach a MM with the same parameters to each agent. Necessary for unique policies by agent. 
@@ -86,66 +114,64 @@ $(document).ready(function(){
 	//Update the game over time.           
 	var tick = 0; 	
 	
-	train(1000)
+	train(2000)
 
 	var policy;
 
 	function train(iter = 1000){
-		var tick = 0; 
-		while(tick < iter){
-			tick++
-			updateGameModel();
+		var tick = 0;
+	var trainseg = setInterval(function(){
+			tick++;
+			updateGameModel()
 			if(tick % 30 == 0){ //add agents every 30 iterations
 				addNewAgent()
-			}	
-		}
-		//resolve the game
-		resolveGame()
-		policy = valueIteration(markovmodel);
-	}
-
-	test();
-
-	function test(){
-		console.log("Policy is " + JSON.stringify(policy))
-	}
-	
-
-	function addNewAgent(){
-			var agent = new Agent(id = markovmodel.agents.length, name = i, actionset = actions, config = {"action-error": .25})
-			agent.addState(states[conf.birthnode[0]], 0); 
-			agent.mdp = referencemodel.clone();//cloning will attach a MM with the same parameters to each agent. Necessary for unique policies by agent. 
-			agent.jointmdp = markovmodel;
-			markovmodel.addAgent(agent)
-			agent.mdp.agents = [agent];	
-	}
-
-	function iterate(){
-		var updater = setInterval(function(){
-		tick++;
-		updateGameModel();
-		if(tick % 30 == 0){
-			console.log("Adding agent with actions " + actions)
-			var agent = new Agent(id = markovmodel.agents.length, name = i, actionset = actions, config = {"action-error": .25})
-			agent.addState(states[conf.birthnode[0]], 0); 
-			agent.mdp = referencemodel.clone();//cloning will attach a MM with the same parameters to each agent. Necessary for unique policies by agent. 
-			agent.jointmdp = markovmodel;
-			markovmodel.addAgent(agent)
-			agent.mdp.agents = [agent];
-		}
-		if(tick > 2000){
-				clearInterval(updater)
-				resolveGame() //this should be resolved every x amount of iterations. 
 			}
-	}, 5)
 
-
-		console.log("Finding policies")
-		//once iteration is done, we have a probability model. need to generate the optimal policy
+			if(tick > iter){
+				clearInterval(trainseg)
+				resolveProbabilities()
+				policy = valueIteration(markovmodel);
+				test()
+			}	
+		}, 50) 
 		
 	}
+
+
+	function test(){
+		console.log("Testing policy!")
+		visualizePolicyForSingleAgent(policy)
+	}
 	
-	function resolveGame(){
+
+	function visualizePolicyForSingleAgent(policy){
+		var agent = new Agent(id = 0, name = "testagent", actionset = actions, config = {"action-error": .25})
+		agent.addState(states[conf.birthnode[0]], 0); //start agent int the birth node
+		agent.mdp = markovmodel.clone();
+		agent.mdp.agents = [agent]
+		agent.jointmdp = markovmodel;
+		
+		var sequencer = setInterval(function(){
+			var action;
+			//No plicy for the state
+			if(agent.getLastState().id in policy){
+				action = policy[agent.getLastState().id];
+			} else{
+				console.log("No policy for the state " + agent.getLastState().id + " . Executing random")
+				action = agent.chooseRandomAction()
+			}
+			if(agent.mdp.config.terminalnodes.indexOf(agent.getLastState().id) > -1){
+				agent.finish();
+				exit()
+			}	
+			agent.executeAction(action, context={"game": game, "agent": agent, "noise":.25})
+			game.updateMarkovModel(agent.mdp)
+			game.Update()
+		}, 1000) // this is the sequencer
+
+	}
+	
+	function resolveProbabilities(){
 		console.log("Resolving " + markovmodel.agents.length + " agents")
 		for(var i = 0; i < markovmodel.agents.length; i++){
 			console.log("Agent " + markovmodel.agents[i].id + " Probability Matrix is ");
@@ -159,10 +185,16 @@ $(document).ready(function(){
 		console.log(markovmodel.qmatrix.convertQMatToBasicProbabilityMatrix())
 		console.log(markovmodel.qmatrix.convertToQProbabilityMatrix())
 		valueIteration(markovmodel);
-
-
-		alert("Game is done!")
 	}
+
+	function updateAgents(){
+		for(var i = 0; i < markovmodel.agents.length; i++){
+			if(markovmodel.activeagents[i] == true){
+				markovmodel.agents[i].mdp.update()
+			}
+		}
+	}
+
 	function updateGameModel(){
 		for(var i = 0; i < markovmodel.agents.length; i++){
 			//update markov model of agent. 
@@ -184,6 +216,17 @@ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 Can be deleted later if agents are supplied through config. 
 
 */
+
+
+function addNewAgent(){
+			var agent = new Agent(id = markovmodel.agents.length, name = markovmodel.agents.length, actionset = markovmodel.actions, markovmodel.config)
+			agent.addState(markovmodel.states[conf.birthnode[0]], 0); 
+			agent.mdp = markovmodel.referencemodel.clone();//cloning will attach a MM with the same parameters to each agent. Necessary for unique policies by agent. 
+			agent.jointmdp = markovmodel;
+			markovmodel.addAgent(agent)
+			agent.mdp.agents = [agent];	
+}
+
 function policyIDToStateMapping(policy, states){
 	var ret = {}
 	for(key in policy){
