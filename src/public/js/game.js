@@ -147,7 +147,7 @@ function drawsquare(x,y, id, state){
 	**/
 	this.Update = function(){
 		ticks++;
-		console.log("Updating to tick " + ticks)
+		console.log("Updating Tick " + ticks)
 		clearAgents() //clear the agents from the board;
 		clearBoard() 
 		drawBoard() //Need to redraw board in the case the markov state space changes. 
@@ -196,24 +196,20 @@ function AgentActions(){
 	}
 
 	AgentGridActions.StayPut = function(game, agent){
-		console.log("Agent staying put");
 		agent.Act(agent.getLastState(), agent.currentaction, agent.getLastState()); //maove a tick up and add the next state.     
 	}
 
 	AgentGridActions.MoveUp = function(game, agent){
-		console.log("Agent " + agent.name + " moving up");
       	var state = agent.getLastState();
         var states = game.markovmodel.states;
         var wblocks = game.renderconfig.wblocks;
         var targetstate = state.id - wblocks;
         if(state.id < wblocks || !validBlock(targetstate)){
-          console.log("Cannot move above this point.")
           return;
         }
 		agent.Act(state, agent.currentaction, states[targetstate]); //maove a tick up and add the next state.     
 	}
 	AgentGridActions.MoveDown = function(game, agent){
-    	console.log("Agent " + agent.name + " moving down");
 
       	var state = agent.getLastState();
         var states = game.markovmodel.states;
@@ -221,14 +217,12 @@ function AgentActions(){
         var hblocks = game.renderconfig.hblocks; 
         var targetstate = state.id + wblocks;
         if(state.id > ((hblocks - 1) * wblocks) - 1 || !validBlock(targetstate)){// || !validBlock(targetstate)){
-          console.log("Cannot move below this point.")
           return;
         }
 		agent.Act(state, agent.currentaction, states[targetstate]); //maove a tick up and add the next state.     
 	}	
 
 	AgentGridActions.MoveRight = function(game, agent){
-    	console.log("Agent " + agent.name + " moving right");
 
       	var state = agent.getLastState();
         var states = game.markovmodel.states;
@@ -236,7 +230,6 @@ function AgentActions(){
         var targetstate = state.id + 1;
 
         if(onRight(state.id, wblocks) || !validBlock(targetstate)){
-          console.log("Cannot move above this point.")
           return;
       }
 		agent.Act(state, agent.currentaction, states[targetstate]); //maove a tick up and add the next state.     
@@ -250,14 +243,12 @@ function AgentActions(){
 	} 
 
 	AgentGridActions.MoveLeft = function(game, agent){
-	    	console.log("Agent " + agent.name + " moving left");
 
 	      	var state = agent.getLastState();
 	        var states = game.markovmodel.states;
 	        var wblocks = game.renderconfig.wblocks;
 	        var targetstate = state.id - 1;
 	        if(onLeft(state.id, wblocks) || !validBlock(targetstate)){
-	          console.log("Cannot move left. Currently at " + state.id)
 	          return;
 	        }
 		agent.Act(state, agent.currentaction, states[targetstate]); //maove a tick up and add the next state.     

@@ -8,14 +8,17 @@ or the actual function.
 
 The config can support multiple parameters. 
 */
-function Agent(id, name, actionset, config = {}, mdp={}){
+function Agent(id, name, actionset, config = {}, mdp={}, jointmdp = {}){
 	this.id = id;
 	this.name = name != null ? name : id;
 	this.time = 0;
 	this.history = {}; //history contains a map of t -> state
 	this.config = config; 
+	this.isfinished = false;
 	this.actionset = actionset;
 	this.mdp= mdp; //each agent needs to keep track of it's own value map and qmatrix. That is because in certain games agents can have differnet policies. 	
+	this.guid = guid();
+	this.jointmdp = jointmdp; //joinmdp is the main mdp. 
 }
 
 Agent.prototype.setActionSet = function(actions){
@@ -50,11 +53,24 @@ Agent.prototype.addNextState = function(state, timestep){
 	this.addState(state, lasttimestamp + timestep)	
 }
 
+//if the agent finishes, remove him from the main mdp array and call "finish"
+Agent.prototype.finish = function(){
+	this.isfinished = true; 
+	var index = this.jointmdp.agents.indexOf(this);
+	if (index > -1) {
+    	var newjointmdp = this.jointmdp.agents.splice(index, 1);
+		return newjointmdp;
+	}
+}
+
 //The act function will add the next state and also update the transition model
 //assumes a tick of 1. Can be 
 Agent.prototype.Act = function(state, action, stateprime){
 	this.addNextState(stateprime, 1);
 	this.updateTransitionModel(state, action, stateprime);
+	if(this.mdp.config.terminalnodes.indexOf(stateprime.id) > -1){
+		this.finish();
+	}
 }
 
 /*
@@ -64,8 +80,8 @@ Alternative: Could rewrite the matrix as keys and then insert.
 Agent.prototype.updateTransitionModel = function(state, action, stateprime){
 	var qmatrix = this.mdp.qmatrix.qmat;
 	var tmat = this.mdp.qmatrix.tmat;
-	tmat[state.id][action.id][stateprime.id] = tmat[state.id][action.id][stateprime.id] + 1;
-	
+	this.mdp.qmatrix.tmat[state.id][action.id][stateprime.id] = tmat[state.id][action.id][stateprime.id] + 1;	
+
 }	
 
 Agent.prototype.getLastState = function(){
@@ -89,7 +105,6 @@ Agent.prototype.executeAction = function(action, context){
 
 	if(Math.random() <= context.noise){
 		//choose new action
-		console.log("Noise!")
 		var newaction = action;
 		while(newaction == action){
 			newaction = this.chooseRandomAction()
@@ -101,7 +116,7 @@ Agent.prototype.executeAction = function(action, context){
 
 Agent.prototype.chooseRandomAction = function(){
 	var index = Math.floor(Math.random() * this.actionset.length);
-	return this.actionset[index].action
+	return this.actionset[index]
 }
 /*
 There are a couple things to consider. Agents may have different policies. So each agent 

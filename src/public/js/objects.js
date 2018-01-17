@@ -12,7 +12,12 @@
  	this.name = name;
  	this.description = description;
  	this.object = object; //throw an object parameters such as location. 
+ 	this.setValue = function(val){
+ 		this.val = val; 
+ 	}
  }
+
+
 
  //Action is a action function tied to an agent.
  function Action(id, name, action, description = ""){

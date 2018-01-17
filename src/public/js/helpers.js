@@ -9,7 +9,51 @@
    return mat;
  }
 
+
+var contains = function(needle) {
+    // Per spec, the way to identify NaN is that it is not equal to itself
+    var findNaN = needle !== needle;
+    var indexOf;
+
+    if(!findNaN && typeof Array.prototype.indexOf === 'function') {
+        indexOf = Array.prototype.indexOf;
+    } else {
+        indexOf = function(needle) {
+            var i = -1, index = -1;
+
+            for(i = 0; i < this.length; i++) {
+                var item = this[i];
+
+                if((findNaN && item !== item) || item === needle) {
+                    index = i;
+                    break;
+                }
+            }
+
+            return index;
+        };
+    }
+
+    return indexOf.call(this, needle) > -1;
+};
+
+
+ function clone(mat){
+    return $.extend(true, [], mat);
+ }
  
+//https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+function guid() {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+    s4() + '-' + s4() + s4() + s4();
+}
+
+
 Array.prototype.insertIntoEach = function(val){
      for(var i = 0; i < this.length; i++){
       var copyOfMyArray = $.extend(true, [], val);   //need to make a copy or else array will update multiple points.   
@@ -54,6 +98,7 @@ function loadScripts(){
     '/js/objects.js',
     '/js/agents.js',
     '/js/valueiteration.js',
+    '/js/test.js'
   ]
 
   for(var i =0; i < scripts.length; i++){

@@ -33,11 +33,11 @@ $(document).ready(function(){
 		selector: "#simplegamecontainer" //this div to insert the svg container in. 
 	}
 	//Markov Settings
-	var terminalnodes = [1,2]
+	var terminalnodes = [3,7]
 	var birthnodes = [8]
 	var invalidnodes = {5: "true"}
 	var type = "grid"
-    var settings =  {"decayrate": .85, "observationlikeliehood": .33, "learningrate": .1} 
+    var settings =  {"decayrate": .85, "observationlikeliehood": .33, "learningrate": .1, "approx_method": "Crawl", "epsilon": .2} 
 	var rules =  {
        8: {"index": 8,"action": "start", "color": "blue"}, 
        3: {"index": 3,"action": "win", "color": "green", "reward": 1}, 
@@ -51,7 +51,7 @@ $(document).ready(function(){
  	*/
 	waitUntilScriptLoaded("/js/config.js");
 	settings.optimtype = OPTIMIZATIONTYPES[4]; //set the optimtype to combination;
-	settings.approx_method = APPROX_METHODS["Crawl"] //set the transition approximation method. crawl for smaller
+	settings.approx_method = APPROX_METHODS[2] //set the transition approximation method. crawl for smaller
 	//state spaces will work but if you get to a large state space you will need to use alternative approximation methods.. 
 
 	conf = new Config(terminalnodes, birthnodes, invalidnodes, type, rules, settings)
@@ -67,33 +67,52 @@ $(document).ready(function(){
 	waitUntilScriptLoaded("/js/agents.js");
 	var agents = createAgents(2, actions, states);
 
-	markovmodel = new MDP(states, actions, agents, conf)
-//	markovmodel = markovmodel.New()
-	agents = markovmodel.attachMarkovModelToAllAgents(agents);
-	console.log("Created the Markov Model" + Object.keys(markovmodel))
+	//generate the base markov model. 
+	markovmodel = new MDP(states, actions, agents, conf) 
+	
+	//for each agent attach a mdp model;
+	for(var i = 0; i < agents.length; i++){
+		markovmodel.agents[i].mdp = markovmodel.clone(); //cloning will attach a MM with the same parameters to each agent. Necessary for unique policies by agent. 
+		markovmodel.agents[i].jointmdp = markovmodel;
+	}
 
 	//load game
 	game  = new GridGameDrawer(markovmodel, renderconfig);
 	game = game.Start();
 
-	var statepolicy =  policyIDToStateMapping(samplepolicy, states);
-	var tick = 0; 
+	var statepolicy = policyIDToStateMapping(samplepolicy, states);
+	
+	//Update the game over time.           
+	var tick = 0; 	
+	
+	iterate();
 
-
-	//agent update policy	
-	setInterval(function(){
-		//markovmodel.updateAgentsPositionByStateSpacePolicy(statepolicy);	
-		for(var i = 0; i < agents.length; i++){
-		 updateGameModel(i);	
+	function iterate(){
+		var updater = setInterval(function(){
+		tick++;
+		if(tick > 100 || markovmodel.agents.length <= 0){
+			clearInterval(updater)
+			resolveGame() //this should be resolved every x amount of iterations. 
 		}
-	}, 1000)
-
-	function updateGameModel(i){
-		var ind = Math.floor(Math.random() * agents[i].actionset.length) 
-		var context =  {"game": game, "agent": agents[i]}
-
-		//execute action
-		agents[i].executeAction(agents[i].actionset[ind], context);
+		 updateGameModel();
+	}, 399)
+	}
+	
+	function resolveGame(){
+		console.log("Resolving")
+		for(var i = 0; i < markovmodel.agents.length; i++){
+			console.log("Agent " + markovmodel.agents[i].id + " Probability Matrix is ");
+			agents[i].mdp.qmatrix.convertQMatToBasicProbabilityMatrix()
+			agents[i].mdp.qmatrix.convertToQProbabilityMatrix()
+		}
+		alert("Game is done!")
+	}
+	function updateGameModel(){
+		for(var i = 0; i < markovmodel.agents.length; i++){
+			//update markov model of agent. 
+			markovmodel.agents[i].mdp.update()
+			// console.log("Model agents keys are " + Object.keys(markovmodel.agents[i]))
+		}
 		//update markov movel
 		game.updateMarkovModel(markovmodel)
 		game.Update()
@@ -101,22 +120,6 @@ $(document).ready(function(){
 });
 
 
-
-//Move agents by one. mostly for testing. 
-function MoveAgents(markovmodel){
-	var states = markovmodel.states;
-	var agents = markovmodel.agents;
-
-	var ret = []
-	for(var i = 0; i < agents.length; i++){
-		var agent = agents[i];
-		var id = agent.getLastState().id
-		var newid = id >= states.length - 1 ? 0  : id + 1
-		agent.addNextState(states[newid])
-		ret.push(agent)
-	}
-	markovmodel.updateAgents(agents)
-}
 /**
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$CREATION HELPERS$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -150,6 +153,11 @@ function createStates(num){
 	var ret = []
 	for(var id = 0; id< num; id++){
 		var state = new State(id, id, null, "State " + id);
+		if(id in conf.rules){ //FIX
+			if("reward" in conf.rules[id]){
+				state.setValue(conf.rules[id].reward)	
+		 	} else {state.setValue(0)} //Fix
+		} else {state.setValue(0)} // set state initial values to zero, unless reward specified. 
 		ret.push(state);
 	}
 	return ret;

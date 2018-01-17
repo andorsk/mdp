@@ -4,7 +4,6 @@ Main Markov Decision Libary mdp.js
 
 var fullyloadedlibraries = {}
 
-
 /*
 Takes in a set of states and actions and initializes them with probability matrix and q matrix. 
 To initalize: new MDP([args])
@@ -21,6 +20,8 @@ function MDP(states, actions, agents, config){
 	  this.states = states;
 	  this.actions = actions; 
 	  this.agents = agents; 
+	  this.appox_method = config.settings["approx_method"];
+    this.id = guid(); //generate a guid. collision nearly impossible. 
 
       // Game parameters and tracks. Most of these should eventually be turned into game parameters. 
       var observationlikelihood = config.settings.observationlikeliehood;
@@ -92,11 +93,26 @@ function MDP(states, actions, agents, config){
       }
 
 
+      this.generateTransitionProbabilities = function(){
+      	this.config.settings["approx_method"](this) //run the transtion probabilities
+      }
+
+      this.clone = function(){
+       return new MDP(this.states, this.actions, this.agents, this.config)
+      }
+
+      //takes a q matrix and converts it into a schocastic matrix.
+      //requires a list of arrays [state][action][stateprime] 
+      function convertToSchocasticMatrix(qmatrix){
+
+      }
+
        this.attachMarkovModelToAllAgents = function(agents){
       	for(var i = 0; i < agents.length; i++){
-      	     var agent = agents[i]
+      	   var agent = agents[i]
       		 agent.mdp = this;
       		 agents[i] = agent; 
+           console.log("Attaching id to agent" + agents[i].mdp.id)
       	}
       	this.agents = agents;
       	return agents;
@@ -129,27 +145,35 @@ function MDP(states, actions, agents, config){
       	this.agents = ag;
       }
 
+      this.update = function(){
+      	this.generateTransitionProbabilities();
+      }
 
-  	console.log("Initializing Markov Matrix");
-  	initProbabilityMatrices();
-  	console.log("Initialization is done.")
-  	//this.attachMarkovModelToAllAgents(this.agents);
-  	console.log("Attaching models to agents.")
-  	this.qmatrix = qmatrix;
-  	this.transitionmatrix = transitionmatrix;
-  	this.believestatematrix = believestatematrix; 
 
-	this.qmatrixhistory = qmatrixhistory;
-  	this.transitionmatrixhistory = transitionmatrixhistory;
-  	this.beliefstatehistory = beliefstatehistory; 
+		console.log("Initializing Markov Matrix");
+		initProbabilityMatrices();
+		console.log("Initialization is done.")
+		//this.attachMarkovModelToAllAgents(this.agents);
+		console.log("Attaching models to agents.")
+		this.qmatrix = qmatrix;
+		this.transitionmatrix = transitionmatrix;
+		this.believestatematrix = believestatematrix; 
 
-  	this.joinactions = jointactions;
-  	this.jointobservations = jointobservations;
-      
+		this.qmatrixhistory = qmatrixhistory;
+		this.transitionmatrixhistory = transitionmatrixhistory;
+		this.beliefstatehistory = beliefstatehistory; 
+
+		this.joinactions = jointactions;
+		this.jointobservations = jointobservations;
+
 }
 
+/*
+Q Matrix is the expected reward function of a given s and ending up in s'. 
+*/
 function QMatrix(statespace, actionspace){
 	  this.qmat = generateNestedArray(statespace, actionspace)
+    this.emptyqmat = $.extend(true, [], this.qmat);  //make a copy of the structure for later use.  
 	  this.tmat = this.qmat; //this 
 
 	  //needs to be written as recurive function using a list. not too happy with this but it'll do the job for now. 
@@ -170,33 +194,118 @@ function QMatrix(statespace, actionspace){
 
   	  this.getValue = function(state,action, stateprime){
   	  	return this.mat[state.id][action.id][stateprime.id]
-  	  }
-    
+  	  }   
+
+
+    //converts the iterated values into a probability distribution .
+    //because the matrix goes from s to s' need to revese the matrix  
+    this.convertToQProbabilityMatrix = function(){
+      var qmatrix = this.qmat
+      var pmat = clone(this.emptyqmat);
+      for(var i = 0; i < qmatrix.length; i++){//for each action of each state
+        for(var j = 0; j < qmatrix[i].length; j++){
+           var total = math.sum(qmatrix[i][j]);
+            for( var k = 0; k < qmatrix[i][j].length; k++){
+                  if(qmatrix[i][j][k] > 0 && total > 0){
+                     pmat[i][j][k] = qmatrix[i][j][k] / total;
+                  }
+                
+            }
+        }
+      }
+      console.log("PMAT is "  + pmat.toString())
+      return pmat;
+    }
+
+
+	  //Q Matrix has the probability of moving from one state to another given action a. Take that matrix and 
+	  //convert it into a a probability matrix of s, s'
+	  //Note: Need to update the code. This is hacky. IT will have to iterate through every entry in the matrix. 
+	  //Column stochastic (i.e the probability outgoing on the column side.)
+	  this.convertQMatToBasicProbabilityMatrix = function(){
+
+ 			var ret = math.zeros(this.qmat.length, this.qmat.length);
+      ret = ret.valueOf()      
+      for(var i = 0; i < this.qmat.length; i++){
+ 				for(var j = 0; j < this.qmat[i].length; j++){
+ 					for(var k = 0; k < this.qmat[i][j].length; k++){
+            if(this.qmat[i][j][k] > 0){
+              ret[k][i] = parseInt(ret[k][i]) + this.qmat[i][j][k] //the old values
+            }
+ 					}
+ 				}
+ 			}
+ 			for(var i = 0; i < ret.length; i++){
+          var total = math.sum(ret[i])
+          if(total > 0){
+            var nrow = math.divide(ret[i],total)
+            ret[i] = nrow;
+          }
+   			} 	
+        console.log("--------------------------")
+        console.log(ret)
+ 			  return ret;
+		}	
 }
 
-//approximation methods for transition probabilies. Enum. 
-var APPROX_METHODS = Object.freeze({
-	"MCMC": StochasticApproimationMethods.MCMC,
-	"Crawl": StochasticApproimationMethods.Crawl,
-	"Prune": StochasticApproimationMethods.Prune
-})
+function print2DArray(arr){
+  console.log("Printing 2D array")
+  for(var i = 0; i < arr[0].length; i++){
+    var line = returnEmptyString(i);
+    for(var j = 0; j <arr[i].length; j++){
+      line = line + ":" + arr[i][j].toFixed(2) 
+    }
+    console.log(line.toString())
+  }
+}
+
+function returnEmptyString(i){
+  this.i = i;
+  return "";
+}
+
+	/**
+	* Retrieve a column from a matrix
+	* @param {Matrix | Array} matrix
+	* @param {number} index    Zero based column index
+	* @return {Matrix | Array} Returns the column as a vector
+	*/
+	getColumn = (M, i) => math.flatten(M.subset(math.index(math.range(0, M._size[0]),i))).toArray();
+  getRow = (M, i) => math.flatten(M.subset(math.index(i, math.range(0, M._size[0])))).toArray();
+  setRow = (M, i, array) => M.subset(math.index())
+
+
 
 /*
-When the state space gets really large then a crawl won't make sense to use for transition approximations (or at least a naive crawler).
+When the state space gets really large then a crawl won't make sense 
+to use for transition approximations (or at least a naive crawler).
 */
-function StochasticApproimationMethods(){
+
+class StochasticApproimationMethods{
 
 	//Monte Carlo Simulation to Estimate transition parameters. 
-	StochasticApproimationMethods.MCMC = function(){
+    static MCMC(){
+		console.log("Approximiation via Monte Carlo Estimations")
 
 	}
 
 	//Brute force method of approximating parameters via a crawler. Each time an agent moves it will update transition matrix. 
-	StochasticApproimationMethods.Crawl = function(){
+	static Crawl(markovmodel){
+		var agents = markovmodel.agents;
+		for(var i = 0; i < agents.length; i++){
+			var ind = Math.floor(Math.random() * agents[i].actionset.length) 
+			var context =  {"game": game, "agent": agents[i], "noise" : .5}
+		// //execute action
 
+			agents[i].executeAction(agents[i].actionset[ind], context);
+		}
+		return;
 	}
-	
-	//Prunes a decision tree to intelligently approximate methods. 
-	StochasticApproimationMethods.Prune = function()
 
+	//Prunes a decision tree to intelligently approximate methods. 
+	static Prune(){
+		console.log("Pruning")
+	}
+
+	
 }

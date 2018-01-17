@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package proto;
+
+/*
+This is currently non-active. Need to make methods to deserialize function and Object byte streams. Will deal with this later, but ultimately object creation is best supported from something like protobuf, for maneagability. 
+*/
+
+message State {
+	int id = 1;
+	string name = 2;
+	string description = 3;
+	Object object = 4; //will not work
+}
+
+message Action {
+	int id = 1; 
+	string name = 2;
+	function action = 3; // will not work
+	string description = 4;
+}
+
+message Rule {
+	State state = 1;
+	string action = 2; 
+	string color = 3; 
+	int reward = 4;
+	map<string, Object> extrarules = 5;
+}
+
+message Settings {
+	double decayrate = 1;
+	double observationlikliehood = 2;
+	double learningrate = 3; 
+	string approx_method = 4; 
+}
+
+message Config {
+	repeated State terminalnodes = 1; 
+	repeated State birthnodes = 2;
+	repeated State invalidnodes = 3;
+	string type = 4;
+	repeated Rule rules = 5;
+	Setting settings = 6;
+}
+

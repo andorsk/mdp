@@ -4,10 +4,10 @@ A Markov Decision Process is a schocastic method encodes action policies from s 
 
 #### Libaries 
 
-* jquery 
-* math.js
-* d3 
-* node.js / express - for examples 
+* jquery //used to interact with the dom
+* math.js //used for matrix operations. 
+* d3 //used for rendering and shape help. 
+* node.js / express - to run a server and see examples.
 
 ### Models
 

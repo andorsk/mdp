@@ -22,16 +22,17 @@ var OPTIMIZATIONTYPES = Object.freeze({
 
 //approximation methods for transition probabilies. Enum. 
 var APPROX_METHODS = Object.freeze({
-	"MCMC": StochasticApproimationMethods.MCMC,
-	"Crawl": StochasticApproimationMethods.Crawl,
-	"Prune": StochasticApproimationMethods.Prune
+	1: StochasticApproimationMethods.MCMC,
+	2: StochasticApproimationMethods.Crawl,
+	3: StochasticApproimationMethods.Prune
 })
 
 
 defaultConfig = {
 	decayrate: .85,
 	observationlikeliehood: .33,
-	optimtype: OPTIMIZATIONTYPES[4]
+	optimtype: OPTIMIZATIONTYPES[4],
+	appox_method:  APPROX_METHODS["Crawl"]
 }
 
 function Config(terminalnodes, birthnode, invalidnodes, type, rules = {}, settings = {}){
@@ -45,15 +46,17 @@ function Config(terminalnodes, birthnode, invalidnodes, type, rules = {}, settin
 	this.type = type;
 	this.rules = rules;
 	this.settings = settings;
+
+	this.printConfig()
 }
 
 Config.prototype.printConfig = function(){
 	console.log("Terminal nodes are : " + this.terminalnodes)
 	console.log("Birth Node is : " + this.birthnode)
 	console.log("Invalid Nodes are  " + this.invalidnodes)
-	console.log("Type is : " + this.type)
-	console.log("Rules are: " + this.rules)
-	console.log("Settings are " + this.settings);
+	console.log("Type is : " + JSON.stringify(this.type));
+	console.log("Rules are: " + JSON.stringify(this.rules));
+	console.log("Settings are " + JSON.stringify(this.settings));
 }
 
 function setDefaultsIfNotPresent(settings){
