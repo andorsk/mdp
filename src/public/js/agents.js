@@ -55,12 +55,9 @@ Agent.prototype.addNextState = function(state, timestep){
 
 //if the agent finishes, remove him from the main mdp array and call "finish"
 Agent.prototype.finish = function(){
+ 	console.log("Agent " + this.id + " has finished making it to the end. Terminating agent actions")
 	this.isfinished = true; 
-	var index = this.jointmdp.agents.indexOf(this);
-	if (index > -1) {
-    	var newjointmdp = this.jointmdp.agents.splice(index, 1);
-		return newjointmdp;
-	}
+	this.jointmdp.activeagents[this.id] = false
 }
 
 //The act function will add the next state and also update the transition model
@@ -78,10 +75,11 @@ Updates the agents transition models. Need the indexed values of the matrix.
 Alternative: Could rewrite the matrix as keys and then insert. 
 */
 Agent.prototype.updateTransitionModel = function(state, action, stateprime){
-	var qmatrix = this.mdp.qmatrix.qmat;
 	var tmat = this.mdp.qmatrix.tmat;
-	this.mdp.qmatrix.tmat[state.id][action.id][stateprime.id] = tmat[state.id][action.id][stateprime.id] + 1;	
+	var jointtmat = this.mdp.qmatrix.tmat;
 
+	this.mdp.qmatrix.tmat[state.id][action.id][stateprime.id] = tmat[state.id][action.id][stateprime.id] + 1;	
+	this.jointmdp.qmatrix.tmat[state.id][action.id][stateprime.id] = this.jointmdp.qmatrix.tmat[state.id][action.id][stateprime.id] + 1;	
 }	
 
 Agent.prototype.getLastState = function(){

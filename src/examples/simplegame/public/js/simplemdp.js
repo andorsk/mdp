@@ -69,10 +69,11 @@ $(document).ready(function(){
 
 	//generate the base markov model. 
 	markovmodel = new MDP(states, actions, agents, conf) 
-	
+	var referencemodel = markovmodel.clone();
 	//for each agent attach a mdp model;
 	for(var i = 0; i < agents.length; i++){
 		markovmodel.agents[i].mdp = markovmodel.clone(); //cloning will attach a MM with the same parameters to each agent. Necessary for unique policies by agent. 
+		markovmodel.agents[i].mdp.agents = [agents[i]]
 		markovmodel.agents[i].jointmdp = markovmodel;
 	}
 
@@ -85,33 +86,89 @@ $(document).ready(function(){
 	//Update the game over time.           
 	var tick = 0; 	
 	
-	iterate();
+	train(1000)
+
+	var policy;
+
+	function train(iter = 1000){
+		var tick = 0; 
+		while(tick < iter){
+			tick++
+			updateGameModel();
+			if(tick % 30 == 0){ //add agents every 30 iterations
+				addNewAgent()
+			}	
+		}
+		//resolve the game
+		resolveGame()
+		policy = valueIteration(markovmodel);
+	}
+
+	test();
+
+	function test(){
+		console.log("Policy is " + JSON.stringify(policy))
+	}
+	
+
+	function addNewAgent(){
+			var agent = new Agent(id = markovmodel.agents.length, name = i, actionset = actions, config = {"action-error": .25})
+			agent.addState(states[conf.birthnode[0]], 0); 
+			agent.mdp = referencemodel.clone();//cloning will attach a MM with the same parameters to each agent. Necessary for unique policies by agent. 
+			agent.jointmdp = markovmodel;
+			markovmodel.addAgent(agent)
+			agent.mdp.agents = [agent];	
+	}
 
 	function iterate(){
 		var updater = setInterval(function(){
 		tick++;
-		if(tick > 100 || markovmodel.agents.length <= 0){
-			clearInterval(updater)
-			resolveGame() //this should be resolved every x amount of iterations. 
+		updateGameModel();
+		if(tick % 30 == 0){
+			console.log("Adding agent with actions " + actions)
+			var agent = new Agent(id = markovmodel.agents.length, name = i, actionset = actions, config = {"action-error": .25})
+			agent.addState(states[conf.birthnode[0]], 0); 
+			agent.mdp = referencemodel.clone();//cloning will attach a MM with the same parameters to each agent. Necessary for unique policies by agent. 
+			agent.jointmdp = markovmodel;
+			markovmodel.addAgent(agent)
+			agent.mdp.agents = [agent];
 		}
-		 updateGameModel();
-	}, 399)
+		if(tick > 2000){
+				clearInterval(updater)
+				resolveGame() //this should be resolved every x amount of iterations. 
+			}
+	}, 5)
+
+
+		console.log("Finding policies")
+		//once iteration is done, we have a probability model. need to generate the optimal policy
+		
 	}
 	
 	function resolveGame(){
-		console.log("Resolving")
+		console.log("Resolving " + markovmodel.agents.length + " agents")
 		for(var i = 0; i < markovmodel.agents.length; i++){
 			console.log("Agent " + markovmodel.agents[i].id + " Probability Matrix is ");
 			agents[i].mdp.qmatrix.convertQMatToBasicProbabilityMatrix()
 			agents[i].mdp.qmatrix.convertToQProbabilityMatrix()
+			waitUntilScriptLoaded("/js/valueiteration.js");
+			console.log("Agent mdp is " + Object.keys(agents[i].mdp.qmatrix.qmat))
 		}
+
+		console.log("Joint probability matrix is ")
+		console.log(markovmodel.qmatrix.convertQMatToBasicProbabilityMatrix())
+		console.log(markovmodel.qmatrix.convertToQProbabilityMatrix())
+		valueIteration(markovmodel);
+
+
 		alert("Game is done!")
 	}
 	function updateGameModel(){
 		for(var i = 0; i < markovmodel.agents.length; i++){
 			//update markov model of agent. 
-			markovmodel.agents[i].mdp.update()
-			// console.log("Model agents keys are " + Object.keys(markovmodel.agents[i]))
+			if(markovmodel.activeagents[i] == true){
+				markovmodel.agents[i].mdp.update()
+			}
 		}
 		//update markov movel
 		game.updateMarkovModel(markovmodel)
@@ -141,7 +198,7 @@ function policyIDToStateMapping(policy, states){
 function createAgents(num, actions, states){
 	var agents = []
 	for(var i = 0; i < num; i++){
-		var agent = new Agent(id = i, name = i, actionset = actions, config = {"action-error": .25})
+		var agent = new Agent(id = i, name = i, actionset = actions, config = {"noise": .25})
 		agent.addState(states[conf.birthnode[0]], 0); 
 		agents.push(agent);
 	}

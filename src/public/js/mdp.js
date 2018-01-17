@@ -22,7 +22,7 @@ function MDP(states, actions, agents, config){
 	  this.agents = agents; 
 	  this.appox_method = config.settings["approx_method"];
     this.id = guid(); //generate a guid. collision nearly impossible. 
-
+    this.activeagents = {}; // a mapping to keep track of if the agent is active or not.
       // Game parameters and tracks. Most of these should eventually be turned into game parameters. 
       var observationlikelihood = config.settings.observationlikeliehood;
       var turn = 0;
@@ -68,6 +68,17 @@ function MDP(states, actions, agents, config){
   	  //Messsage are the sum of atomic messages sent by agent i 
   	  var messages = []
 
+
+      //create a list of active agents. Assuming all agents are active at the start. 
+      for(var i = 0; i < agents.length; i++){
+        this.activeagents[agents[i].id] = true //push the id of active agents to a mapping. 
+      }
+
+      this.addAgent = function(agent){
+        this.agents.push(agent);
+        this.activeagents[agent.id] = true;
+        console.log("Added agent. Now the active agents are " + this.activeagents)
+      }
   	   /*
         Initalize the Transition matrix and the Q matrix
       */
@@ -79,7 +90,6 @@ function MDP(states, actions, agents, config){
 
           function initQMatrix(){
              qmatrix = new QMatrix(states, actions);
-             console.log("Initalized QMat with " + qmatrix.tmat)
             }
 
           function initObservationMatrix(){
@@ -176,7 +186,7 @@ function QMatrix(statespace, actionspace){
     this.emptyqmat = $.extend(true, [], this.qmat);  //make a copy of the structure for later use.  
 	  this.tmat = this.qmat; //this 
 
-	  //needs to be written as recurive function using a list. not too happy with this but it'll do the job for now. 
+	   //needs to be written as recurive function using a list. not too happy with this but it'll do the job for now. 
   	  function generateNestedArray(statespace, actionspace){
   	  	var sarray = new Array(statespace.length)
   	  	var aarr = new Array(actionspace.length)
@@ -192,28 +202,27 @@ function QMatrix(statespace, actionspace){
   	  	this.mat[state.id][action.id][stateprime.id] = val;
   	  }
 
+      //get the value for the matrix. 
   	  this.getValue = function(state,action, stateprime){
   	  	return this.mat[state.id][action.id][stateprime.id]
   	  }   
 
 
     //converts the iterated values into a probability distribution .
-    //because the matrix goes from s to s' need to revese the matrix  
-    this.convertToQProbabilityMatrix = function(){
-      var qmatrix = this.qmat
+    this.convertToQProbabilityMatrix = function(markovmodel){
+      var tmat = this.qmat
       var pmat = clone(this.emptyqmat);
-      for(var i = 0; i < qmatrix.length; i++){//for each action of each state
-        for(var j = 0; j < qmatrix[i].length; j++){
-           var total = math.sum(qmatrix[i][j]);
-            for( var k = 0; k < qmatrix[i][j].length; k++){
-                  if(qmatrix[i][j][k] > 0 && total > 0){
-                     pmat[i][j][k] = qmatrix[i][j][k] / total;
+      for(var i = 0; i < tmat.length; i++){ //for each action of each state
+        for(var j = 0; j < tmat[i].length; j++){
+            total = math.sum(tmat[i][j])
+            for( var k = 0; k < tmat[i][j].length; k++){
+                  if(tmat[i][j][k] > 0 && total > 0){
+                     pmat[i][j][k] = tmat[i][j][k] / total;
                   }
-                
             }
         }
       }
-      console.log("PMAT is "  + pmat.toString())
+      this.qmat = pmat;
       return pmat;
     }
 
@@ -223,7 +232,6 @@ function QMatrix(statespace, actionspace){
 	  //Note: Need to update the code. This is hacky. IT will have to iterate through every entry in the matrix. 
 	  //Column stochastic (i.e the probability outgoing on the column side.)
 	  this.convertQMatToBasicProbabilityMatrix = function(){
-
  			var ret = math.zeros(this.qmat.length, this.qmat.length);
       ret = ret.valueOf()      
       for(var i = 0; i < this.qmat.length; i++){
@@ -259,6 +267,7 @@ function print2DArray(arr){
   }
 }
 
+//loop issues with javascript may require to return an empty string. 
 function returnEmptyString(i){
   this.i = i;
   return "";
@@ -292,11 +301,10 @@ class StochasticApproimationMethods{
 	//Brute force method of approximating parameters via a crawler. Each time an agent moves it will update transition matrix. 
 	static Crawl(markovmodel){
 		var agents = markovmodel.agents;
-		for(var i = 0; i < agents.length; i++){
-			var ind = Math.floor(Math.random() * agents[i].actionset.length) 
-			var context =  {"game": game, "agent": agents[i], "noise" : .5}
-		// //execute action
 
+		for(var i = 0; i < agents.length; i++){
+    	var ind = Math.floor(Math.random() * agents[i].actionset.length) 
+			var context =  {"game": game, "agent": agents[i]} //change noise later. up high for testing. 
 			agents[i].executeAction(agents[i].actionset[ind], context);
 		}
 		return;

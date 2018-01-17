@@ -147,7 +147,9 @@ function drawsquare(x,y, id, state){
 	**/
 	this.Update = function(){
 		ticks++;
-		console.log("Updating Tick " + ticks)
+		if(ticks % 10 == 0){
+			console.log("Updating Tick " + ticks)
+		}
 		clearAgents() //clear the agents from the board;
 		clearBoard() 
 		drawBoard() //Need to redraw board in the case the markov state space changes. 
