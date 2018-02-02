@@ -52,7 +52,7 @@ function MDP(states, actions, agents, config){
 
       /*A belief state is a probability distribution over states 
       that summarize the knowledge of the agents of a given point.
-	  It is updated via Bayesian logic.
+	    It is updated via Bayesian logic.
       The belief state matrix is the probability of a the next belief of b' given a belief and an action. 
       */ 
       var believestatematrix;
@@ -74,14 +74,20 @@ function MDP(states, actions, agents, config){
         this.activeagents[agents[i].id] = true //push the id of active agents to a mapping. 
       }
 
+      /**
+      Add an agent to the current markov model. 
+      @agent: an agent
+      */
       this.addAgent = function(agent){
         this.agents.push(agent);
         this.activeagents[agent.id] = true;
         console.log("Added agent. Now the active agents are " + this.activeagents)
       }
-  	   /*
-        Initalize the Transition matrix and the Q matrix
-      */
+  	 
+      //Initalize the Transition matrix and the Q matrix.
+      //The transition matrix size will be state^2
+      //The QMatrix will be state^2 * actions
+      //At the beginning all states are initialized with a value of 0.  
       function initProbabilityMatrices(){
        	
           function initTransitionMatrix(){
@@ -273,47 +279,16 @@ function returnEmptyString(i){
   return "";
 }
 
-	/**
-	* Retrieve a column from a matrix
-	* @param {Matrix | Array} matrix
-	* @param {number} index    Zero based column index
-	* @return {Matrix | Array} Returns the column as a vector
-	*/
-	getColumn = (M, i) => math.flatten(M.subset(math.index(math.range(0, M._size[0]),i))).toArray();
-  getRow = (M, i) => math.flatten(M.subset(math.index(i, math.range(0, M._size[0])))).toArray();
-  setRow = (M, i, array) => M.subset(math.index())
-
-
-
-/*
-When the state space gets really large then a crawl won't make sense 
-to use for transition approximations (or at least a naive crawler).
+/**
+Possibly push into the helper.js file
+* Retrieve a column from a matrix
+* @param {Matrix | Array} matrix
+* @param {number} index    Zero based column index
+* @return {Matrix | Array} Returns the column as a vector
 */
+getColumn = (M, i) => math.flatten(M.subset(math.index(math.range(0, M._size[0]),i))).toArray();
+getRow = (M, i) => math.flatten(M.subset(math.index(i, math.range(0, M._size[0])))).toArray();
+setRow = (M, i, array) => M.subset(math.index())
 
-class StochasticApproimationMethods{
 
-	//Monte Carlo Simulation to Estimate transition parameters. 
-    static MCMC(){
-		console.log("Approximiation via Monte Carlo Estimations")
 
-	}
-
-	//Brute force method of approximating parameters via a crawler. Each time an agent moves it will update transition matrix. 
-	static Crawl(markovmodel){
-		var agents = markovmodel.agents;
-
-		for(var i = 0; i < agents.length; i++){
-    	var ind = Math.floor(Math.random() * agents[i].actionset.length) 
-			var context =  {"game": game, "agent": agents[i]} //change noise later. up high for testing. 
-			agents[i].executeAction(agents[i].actionset[ind], context);
-		}
-		return;
-	}
-
-	//Prunes a decision tree to intelligently approximate methods. 
-	static Prune(){
-		console.log("Pruning")
-	}
-
-	
-}
