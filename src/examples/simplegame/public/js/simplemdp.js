@@ -124,9 +124,9 @@ $(document).ready(function(){
 	var trainseg = setInterval(function(){
 			tick++;
 			updateGameModel()
-			if(tick % 30 == 0){ //add agents every 30 iterations
-				addNewAgent()
-			}
+			// if(tick % 30 == 0){ //TODO: Instead when they go to a terminal node just restart at the entrance. 
+			// 	addNewAgent()
+			// }
 
 			if(tick > iter){
 				clearInterval(trainseg)
@@ -134,7 +134,7 @@ $(document).ready(function(){
 				policy = valueIteration(markovmodel);
 				test()
 			}	
-		}, 1000) 
+		}, 50) 
 		
 	}
 
@@ -211,7 +211,6 @@ $(document).ready(function(){
 		//update markov movel
 		game.updateMarkovModel(markovmodel)
 		game.Update()
-		game.printOccupiedStates(markovmodel);
 	}
 });
 

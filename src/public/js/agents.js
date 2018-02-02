@@ -60,6 +60,13 @@ Agent.prototype.finish = function(){
 	this.jointmdp.activeagents[this.id] = false
 }
 
+//Restart Agent at the beginning
+Agent.prototype.restart = function(){
+	this.isfinished = false;
+	this.jointmdp.activeagents[this.id] = true
+	this.addNextState(this.mdp.states[this.jointmdp.config.birthnode[0]],1) //SHOULDN"T assume 0 is the birthnode
+}
+
 //The act function will add the next state and also update the transition model
 //assumes a tick of 1. 
 
@@ -69,14 +76,13 @@ Agent.prototype.Act = function(state, action, stateprime){
 	var s = this.jointmdp.states[stateprime.id]
 	this.jointmdp.states[state.id].removeAgentOccupation();
 	if(s.setAgentOccupiedIfOpen(this) == -1){
-		console.log("trying to get to stateprime id " + stateprime.id)
 		return
 	};
 	this.addNextState(stateprime, 1);
 
 	this.updateTransitionModel(state, action, stateprime);
 	if(this.mdp.config.terminalnodes.indexOf(stateprime.id) > -1){
-		this.finish();
+		this.restart();
 	}
 }
 
