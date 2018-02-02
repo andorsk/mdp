@@ -61,9 +61,19 @@ Agent.prototype.finish = function(){
 }
 
 //The act function will add the next state and also update the transition model
-//assumes a tick of 1. Can be 
+//assumes a tick of 1. 
+
+//TODO: Need to design the update to both the join model and the single model better. 
 Agent.prototype.Act = function(state, action, stateprime){
+	//check if the space was already occupied
+	var s = this.jointmdp.states[stateprime.id]
+	this.jointmdp.states[state.id].removeAgentOccupation();
+	if(s.setAgentOccupiedIfOpen(this) == -1){
+		console.log("trying to get to stateprime id " + stateprime.id)
+		return
+	};
 	this.addNextState(stateprime, 1);
+
 	this.updateTransitionModel(state, action, stateprime);
 	if(this.mdp.config.terminalnodes.indexOf(stateprime.id) > -1){
 		this.finish();

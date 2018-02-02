@@ -30,7 +30,8 @@ $(document).ready(function(){
 		hblocks: 10,
 		width: 500,
 		height: 300,
-		selector: "#simplegamecontainer" //this div to insert the svg container in. 
+		selector: "#simplegamecontainer",
+		showvalues: true //this div to insert the svg container in. 
 	}
 	//Markov Settings
 	var terminalnodes = [99,98]
@@ -45,10 +46,9 @@ $(document).ready(function(){
        99: {"index": 99,"action": "win", "color": "green", "reward": 1}, 
        98: {"index": 98,"action": "lose", "color": "red", "reward": -1}
    }
-   var inv = genRandomInvalidNodes(20);
+   var inv = genRandomInvalidNodes(40);
    rules = inv[0]
    invalidnodes = inv[1] 
-   console.log("New Ingalid Nodes are " + rules)
    
    function genRandomInvalidNodes(num){
   	var invalidnodes = {}
@@ -68,8 +68,7 @@ $(document).ready(function(){
    	   invalidnodes[0] = {"index": 0,"action": "start", "color": "blue"}, 
        invalidnodes[99] =  {"index": 99,"action": "win", "color": "green", "reward": 1}, 
        invalidnodes[98] =  {"index": 98,"action": "lose", "color": "red", "reward": -1}
-   	console.log("invalid nodes are " + JSON.stringify(invalidnodes))
-   	return [invalidnodes, invalidlist]
+	return [invalidnodes, invalidlist]
    }
 
  	/**
@@ -85,7 +84,7 @@ $(document).ready(function(){
 	console.log("Staring Simple MDP");
 
 	waitUntilScriptLoaded("/js/objects.js");
-	var states = createStates(100);
+	var states = createStates(renderconfig.wblocks * renderconfig.hblocks);
 
 	//Game.js has the actinos so we need to load it.
 	waitUntilScriptLoaded("/js/game.js");
@@ -104,6 +103,8 @@ $(document).ready(function(){
 		markovmodel.agents[i].mdp.agents = [agents[i]]
 		markovmodel.agents[i].jointmdp = markovmodel;
 	}
+
+	waitUntilScriptLoaded("/js/exploration.js");
 
 	//load game
 	game  = new GridGameDrawer(markovmodel, renderconfig);
@@ -133,10 +134,15 @@ $(document).ready(function(){
 				policy = valueIteration(markovmodel);
 				test()
 			}	
-		}, 50) 
+		}, 1000) 
 		
 	}
 
+
+	game.TestHandler = function(){
+		console.log("Game Testing")
+		test();
+	}
 
 	function test(){
 		console.log("Testing policy!")
@@ -205,6 +211,7 @@ $(document).ready(function(){
 		//update markov movel
 		game.updateMarkovModel(markovmodel)
 		game.Update()
+		game.printOccupiedStates(markovmodel);
 	}
 });
 
@@ -251,7 +258,7 @@ function createAgents(num, actions, states){
 //"Helper functions to pass states"
 function createStates(num){
 	var ret = []
-	for(var id = 0; id< num; id++){
+	for(var id = 0; id < num; id++){
 		var state = new State(id, id, null, "State " + id);
 		if(id in conf.rules){ //FIX
 			if("reward" in conf.rules[id]){

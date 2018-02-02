@@ -108,31 +108,28 @@ function MDP(states, actions, agents, config){
 
       }
 
-
+      //This will go through a number of iterations and call the correct approximation method in the exploration.js file. 
+      //Examples include: walk, MCMC, and A*. 
       this.generateTransitionProbabilities = function(){
       	this.config.settings["approx_method"](this) //run the transtion probabilities
       }
 
+      //returns a COPY of the MDP values. THerefore all addresses are reinitalized.  
       this.clone = function(){
-       return new MDP(this.states, this.actions, this.agents, this.config)
+       return $.extend(true, [], this);
       }
 
-      //takes a q matrix and converts it into a schocastic matrix.
-      //requires a list of arrays [state][action][stateprime] 
-      function convertToSchocasticMatrix(qmatrix){
-
-      }
-
-       this.attachMarkovModelToAllAgents = function(agents){
-      	for(var i = 0; i < agents.length; i++){
-      	   var agent = agents[i]
-      		 agent.mdp = this;
-      		 agents[i] = agent; 
-           console.log("Attaching id to agent" + agents[i].mdp.id)
-      	}
-      	this.agents = agents;
-      	return agents;
-      }
+     //For each agent in the model, attach this markov model to each of the agents. 
+     this.attachMarkovModelToAllAgents = function(agents){
+    	for(var i = 0; i < agents.length; i++){
+    	   var agent = agents[i]
+    		 agent.mdp = this;
+    		 agents[i] = agent; 
+         console.log("Attaching id to agent" + agents[i].mdp.id)
+    	}
+    	this.agents = agents;
+    	return agents;
+    }
 
       //This will use a policy to state mapping and implement a linked mapping between state1 and state 2. 
       //mapping must be state to state. You can run a conversion in another method if you want to specify the 

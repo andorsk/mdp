@@ -98,7 +98,8 @@ function loadScripts(){
     '/js/objects.js',
     '/js/agents.js',
     '/js/valueiteration.js',
-    '/js/test.js'
+    '/js/test.js',
+    '/js/exploration.js'
   ]
 
   for(var i =0; i < scripts.length; i++){

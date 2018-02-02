@@ -16,6 +16,17 @@ Note: You must give the game div a ".game" class.
 */
 function GridGameDrawer(markovmodel, renderconfig){
 
+
+this.printOccupiedStates = function(mdp){
+		var occupiedindex = [];
+		for(var i = 0; i < mdp.states.length; i++){
+			if(mdp.states[i].isOccupied()){
+				occupiedindex.push(i)
+			}
+		}
+		console.log("States Occupied are " + occupiedindex)
+}
+
 if(markovmodel == null || renderconfig == null ){
 	console.log("You need to supply a markov model and a config to render! Returning")
 	return
@@ -63,11 +74,8 @@ function drawBoard(){
 		}
 		console.log("WBlocks are " + wblocks + " and hblocks are "  + hblocks)
 		for(var i = 0; i < wblocks; i++){
-			console.log("I is " + i)
           for(var j = 0; j < hblocks; j++){
- 			console.log("J is " + j)
           		var ind = ((i * (wblocks)) + j)
-          		console.log("Index is " + ind)
           		var state = markovmodel.states[ind];
           		board2state[ind] = state;
           		state2board[state.id] = ind; //state reference is the index to the states array. 
@@ -226,7 +234,7 @@ function AgentActions(){
         var states = game.markovmodel.states;
         var wblocks = game.renderconfig.wblocks;
         var targetstate = state.id - wblocks;
-        if(state.id < wblocks || !validBlock(targetstate)){
+        if(state.id < wblocks || !validBlock(targetstate, agent)){
           return;
         }
 		agent.Act(state, agent.currentaction, states[targetstate]); //maove a tick up and add the next state.     
@@ -238,7 +246,7 @@ function AgentActions(){
         var wblocks = game.renderconfig.wblocks;
         var hblocks = game.renderconfig.hblocks; 
         var targetstate = state.id + wblocks;
-        if(state.id > ((hblocks - 1) * wblocks) - 1 || !validBlock(targetstate)){// || !validBlock(targetstate)){
+        if(state.id > ((hblocks - 1) * wblocks) - 1 || !validBlock(targetstate, agent)){// || !validBlock(targetstate)){
           return;
         }
 		agent.Act(state, agent.currentaction, states[targetstate]); //maove a tick up and add the next state.     
@@ -251,7 +259,7 @@ function AgentActions(){
         var wblocks = game.renderconfig.wblocks;
         var targetstate = state.id + 1;
 
-        if(onRight(state.id, wblocks) || !validBlock(targetstate)){
+        if(onRight(state.id, wblocks) || !validBlock(targetstate, agent)){
           return;
       }
 		agent.Act(state, agent.currentaction, states[targetstate]); //maove a tick up and add the next state.     
@@ -270,7 +278,7 @@ function AgentActions(){
 	        var states = game.markovmodel.states;
 	        var wblocks = game.renderconfig.wblocks;
 	        var targetstate = state.id - 1;
-	        if(onLeft(state.id, wblocks) || !validBlock(targetstate)){
+	        if(onLeft(state.id, wblocks) || !validBlock(targetstate, agent)){
 	          return;
 	        }
 		agent.Act(state, agent.currentaction, states[targetstate]); //maove a tick up and add the next state.     
@@ -284,12 +292,14 @@ function AgentActions(){
 	}
 
 
-    function validBlock(stateid){
-	    if(stateid in markovmodel.config.invalidnodes){
+    function validBlock(stateid, agent){
+    	console.log("OOOO" + agent.jointmdp.states[stateid].isOccupied())
+	    if(stateid in markovmodel.config.invalidnodes || (agent.jointmdp.states[stateid].isOccupied() && agent.jointmdp.states[stateid].getAgent() != agent)){
 	      return false;
 	    }
 	    return true;
 	}
+
 }
 
 	
