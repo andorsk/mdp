@@ -61,14 +61,17 @@ function drawBoard(){
 		if(wblocks * hblocks != markovmodel.states.length){
 			alert("Please make sure that you specify the wblocks * hblocks = to the total states.")
 		}
-
+		console.log("WBlocks are " + wblocks + " and hblocks are "  + hblocks)
 		for(var i = 0; i < wblocks; i++){
+			console.log("I is " + i)
           for(var j = 0; j < hblocks; j++){
-          		var ind = ((i * (wblocks -1)) + j)
+ 			console.log("J is " + j)
+          		var ind = ((i * (wblocks)) + j)
+          		console.log("Index is " + ind)
           		var state = markovmodel.states[ind];
           		board2state[ind] = state;
-          		state2board[JSON.stringify(state)] = ind; //state reference is the index to the states array. 
-            	drawsquare(i*square.width, j*square.height,i + (j * wblocks), state)		
+          		state2board[state.id] = ind; //state reference is the index to the states array. 
+            	drawsquare(i*square.width, j*square.height,ind, state)		
           }
         }
 }
@@ -84,7 +87,7 @@ function drawsquare(x,y, id, state){
 	  .attr("id", "gblock" + id)
 	  .attr("transform", "translate(" + x + "," + y + ")")
 
-	state2graphic[state] = gobj; //mapping from state to graphics for easy access;
+	state2graphic[id] = gobj; //mapping from state to graphics for easy access;
 	board2graphic[id] = gobj; 
 
 	var block = gobj
@@ -108,10 +111,9 @@ function drawsquare(x,y, id, state){
 		//get agents from markov model
 		for(var i = 0; i < markovmodel.agents.length; i++){
 			var currentAgentState = markovmodel.agents[i].state;
-
 			var graphic = state2graphic[currentAgentState];
 			agent2board[markovmodel.agents[i]] = state2board[currentAgentState] //could store agent id as well. 
-			drawagent(state2board[JSON.stringify(currentAgentState)], markovmodel.agents[i].getId())
+			drawagent(state2board[currentAgentState.id], markovmodel.agents[i].getId())
 		}
 	}
 
@@ -121,6 +123,19 @@ function drawsquare(x,y, id, state){
 	    svg.select("#gblock" + blockid).append("circle").attr("r", radius).attr("fill", "green").attr("cx", (square.width/2)).attr("cy", (square.height/2)).attr("id", "agent"+agentid).attr("class", "agent agent" +agentid).attr("currentblock", blockid).attr("opacity", 1)
 	    radius -= (radius * .5)
 	    svg.select("#gblock" + blockid).append("circle").attr("r", radius).attr("fill", "red").attr("cx", (square.width/2)).attr("cy", (square.height/2)).attr("class", "agent agent" +agentid).attr("opacity", 1)
+	}
+
+	//draw values
+	function drawValues(){
+		for(var i = 0; i < markovmodel.states.length; i++){
+			var block = state2graphic[markovmodel.states[i].id]
+			block.append("text")
+			.attr("id", markovmodel.states[i].val)
+			.attr("dy", (square.height / 2) + 4) 
+			.attr("dx", (square.width / 2) - 3)
+			.attr("class" , "text textvalue text" +  markovmodel.states[i].val)
+			.text(function(d){return markovmodel.states[i].val})
+		}
 	}
 
 
@@ -152,7 +167,11 @@ function drawsquare(x,y, id, state){
 		}
 		clearAgents() //clear the agents from the board;
 		clearBoard() 
+
 		drawBoard() //Need to redraw board in the case the markov state space changes. 
+		if(renderconfig.showvalues){
+			 drawValues()
+		}
 		drawAgents() //Draw the agents. 
 	}
 
@@ -165,7 +184,8 @@ Action Listeners
 //Uses the string and reflects it to the correct function
 $(document).ready(function(){
 	$("#simplegamecontainer").find(":button").on('click', function(){	
-		runFunction($(this).val());
+		console.log("Running " + $(this).val)
+		//runFunction($(this).val());
 	})
 })
 
