@@ -1,0 +1,24 @@
+<style>
+      .demo{
+        border-color: black;
+        border-width: 2px;
+        border-style: solid;
+        align-items: middle;
+      }
+
+      .gamecontainer{
+        text-align: center;
+      }
+
+      .movebutton{
+        margin: 0 auto;
+        position: relative;
+        float:left;
+        padding:5px;
+      }
+
+      #movebuttoncontainers{
+            display: inline-block;    
+
+      }
+</style>

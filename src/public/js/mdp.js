@@ -181,9 +181,9 @@ function MDP(states, actions, agents, config){
 
 }
 
-/*
-Q Matrix is the expected reward function of a given s and ending up in s'. 
-*/
+
+// The Q Matrix represents the transition state s'| s,a. Eventually this gets converted to the expected future rewards of
+// a action at a state given that the agent acts optially throughout the rest of the game. 
 function QMatrix(statespace, actionspace){
 	  this.qmat = generateNestedArray(statespace, actionspace)
     this.emptyqmat = $.extend(true, [], this.qmat);  //make a copy of the structure for later use.  
