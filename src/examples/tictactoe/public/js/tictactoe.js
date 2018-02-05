@@ -17,7 +17,7 @@ $(document).ready(function() {
         selector: "#tictactoecontainer"
     }
 
-    //Markov Settings
+    //Markov Settings. Note: Player id does not start at 0 index. It is 1 index! DO NOT initialize it at 0. 
     var settings = {
         'decayrate': .85,
         'observationlikliehood': .33,
@@ -30,12 +30,14 @@ $(document).ready(function() {
             1: {
                 "color": "green",
                 "marker": "x",
-                "name": "Player1"
+                "name": "Player1",
+                "markersize": 50
             },
             2: {
                 "color": "blue",
                 "marker": "o",
-                "name": "Player2"
+                "name": "Player2",
+                "markersize": 50
             }
         }
     }
@@ -46,7 +48,7 @@ $(document).ready(function() {
     var states = []
 
     waitUntilScriptLoaded("/js/objects.js");
-    waitUntilScriptLoaded("/js/game.js")
+
     var actions = initActions()
 
     waitUntilScriptLoaded("/js/agents.js");
@@ -63,7 +65,7 @@ $(document).ready(function() {
     }
 
     game = new GameEngine(markovmodel, renderconfig);
-    game.train(1000);
+    game.train(3);
 
 })
 
@@ -81,7 +83,7 @@ function initStates(num) {
 function initAgents(num, actions) {
     var agents = []
     for (var i = 0; i < num; i++) {
-        var agent = new Agent(id = i, name = i, actionset = actions, config = {
+        var agent = new Agent(id = i + 1, name = i, actionset = actions, config = {
             "noise": .25
         })
         agents.push(agent);
