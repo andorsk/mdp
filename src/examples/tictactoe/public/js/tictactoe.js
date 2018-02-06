@@ -4,7 +4,8 @@ var conf;
 
 $(document).ready(function() {
 
-    console.log("Starting the game tic-tac-toe")
+    consoleMessage("Starting the game tic-tac-toe")
+    consoleMessage("Loading models...")
     loadScripts(); //async load of scripts 
 
 
@@ -42,6 +43,7 @@ $(document).ready(function() {
         }
     }
 
+    sendMessage(renderconfig.selector, "Loading Board")
     waitUntilScriptLoaded("js/config.js")
 
     var config = new Config("tictactoe", rules, settings)
@@ -63,27 +65,18 @@ $(document).ready(function() {
         markovmodel.agents[i].mdp.agents = [agents[i]]
         markovmodel.agents[i].jointmdp = markovmodel;
     }
+    sendMessage(renderconfig.selector, "Starting Game")
+    consoleMessage("Starting the game")
 
     game = new GameEngine(markovmodel, renderconfig);
-    game.train(3);
+    game.train(7);
 
 })
-
-
-
-function initStates(num) {
-    var ret = []
-    for (var id = 0; id < num; id++) {
-        var state = new State(id, id, null, "State " + id);
-        ret.push(state);
-    }
-    return ret;
-}
 
 function initAgents(num, actions) {
     var agents = []
     for (var i = 0; i < num; i++) {
-        var agent = new Agent(id = i + 1, name = i, actionset = actions, config = {
+        var agent = new Agent(id = i + 1, name = "Player " + (i + 1), actionset = actions, config = {
             "noise": .25
         })
         agents.push(agent);

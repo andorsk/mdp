@@ -6,10 +6,19 @@ class TTTExploration {
     //@return NewState
     //@Board Context
     static RandomChoice(context) {
-        var game = context.game.getGame()
-        var boardsize = context.game.getBoard().size()[0] * context.game.getBoard().size()[1]
-        var randomIdx = Math.floor(Math.random() * boardsize)
-        return AgentTTTActions.PlaceMarker(game, game.getAgents()[context.getTurn()], randomIdx)
+
+        var boardsize = context.board.getBoard().size()[0] * context.board.getBoard().size()[1]
+        var chosen = false;
+
+        var attempts = 0;
+
+        while (chosen == false) { //go until a valid move
+            attempts++; //for debugging
+            var randomIdx = Math.floor(Math.random() * boardsize)
+            if (AgentTTTActions.PlaceMarker(context, randomIdx) || attempts > 5) {
+                chosen = true;
+            }
+        }
     }
 
 

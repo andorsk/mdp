@@ -167,11 +167,10 @@ function MDP(states, actions, agents, config) {
     }
 
 
-    console.log("Initializing Markov Matrix");
+    consoleMessage("Initializing Markov Matrix");
     initProbabilityMatrices();
-    console.log("Initialization is done.")
-    //this.attachMarkovModelToAllAgents(this.agents);
-    console.log("Attaching models to agents.")
+    consoleMessage("Initialization is done.")
+
     this.qmatrix = qmatrix;
     this.transitionmatrix = transitionmatrix;
     this.believestatematrix = believestatematrix;

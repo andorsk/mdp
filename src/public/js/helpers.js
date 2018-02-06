@@ -184,6 +184,26 @@ function isScriptLoaded(url) {
     }
 }
 
+
+var MT = ["INFO", "WARNING", "ERROR"]
+
+function consoleMessage(type, message) {
+    if (typeof message == "undefined") {
+        consoleMessageSimple(type)
+    } else {
+        console.log(Date.now() + " : " + " Type : " + type + " Message: " + message)
+    }
+
+}
+
+function consoleMessageSimple(message) {
+    console.log(Date.now() + " : " + " Message: " + message)
+}
+
+function consoleError(type, message) {
+    console.error("Error: " + Date.now() + " Type:" + type + "  Message: " + message);
+}
+
 /**
 Load the javascript first by the url. 
 **/
