@@ -17,6 +17,8 @@ function TTTRenderEngine(markovmodel, renderconfig) {
     var locid2graphic = {} //a mapping of location to graphic. location id is a zero indexed value to graphic. 
     var game = this;
 
+    this.wblocks = wblocks;
+    this.hblocks = hblocks;
     this.board = null;
     game.markovmodel = markovmodel;
     game.renderconfig = renderconfig;
@@ -163,6 +165,7 @@ function TTTRenderEngine(markovmodel, renderconfig) {
     this.Reset = function() {
         clearBoard();
         clearMarkers();
+        drawBoard();
         this.Start();
     }
 

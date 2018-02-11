@@ -43,7 +43,7 @@ $(document).ready(function() {
         }
     }
 
-    sendMessage(renderconfig.selector, "Loading Board")
+    //  sendMessage(renderconfig.selector, "Loading Board")
     waitUntilScriptLoaded("js/config.js")
 
     var config = new Config("tictactoe", rules, settings)
@@ -65,11 +65,11 @@ $(document).ready(function() {
         markovmodel.agents[i].mdp.agents = [agents[i]]
         markovmodel.agents[i].jointmdp = markovmodel;
     }
-    sendMessage(renderconfig.selector, "Starting Game")
+    //    sendMessage(renderconfig.selector, "Starting Game")
     consoleMessage("Starting the game")
 
     game = new GameEngine(markovmodel, renderconfig);
-    game.train(7);
+    game.train(1);
 
 })
 

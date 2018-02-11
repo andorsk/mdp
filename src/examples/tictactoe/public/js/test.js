@@ -3,10 +3,38 @@ function TTTUnitTester() {
 
     function runtests() {
         this.TestTermination();
+        this.TestLogic();
     }
 
 }
 
+
+
+TTTUnitTester.TestLogic = function() {
+    runtests()
+
+    function runtests() {
+        iTestHomogeneousArrayChecker();
+    }
+
+    function iTestHomogeneousArrayChecker(array) {
+        var tf = logicEngine.checkHomogenousArray();
+
+        var arr = [0, 0, 0]
+        testAssertEqual(tf(arr), true)
+
+        arr = [0, 1, 0]
+        testAssertEqual(tf(arr), false)
+
+        arr = [0, , 0]
+        testAssertEqual(tf(arr), false)
+
+        arr[1, 1, 1]
+        testAssertEqual(tf(arr), true)
+
+    }
+
+}
 
 TTTUnitTester.TestTermination = function() {
     runtests();

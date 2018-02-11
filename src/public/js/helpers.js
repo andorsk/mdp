@@ -135,7 +135,7 @@ function exit(status) {
         'abort', 'close', 'dragdrop', 'load', 'paint', 'reset', 'select', 'submit', 'unload'
     ];
 
-    function stopPropagation(e) {
+    bfunction stopPropagation(e) {
         e.stopPropagation();
         // e.preventDefault(); // Stop for the form controls, etc., too?
     }
@@ -198,6 +198,21 @@ function consoleMessage(type, message) {
 
 function consoleMessageSimple(message) {
     console.log(Date.now() + " : " + " Message: " + message)
+}
+
+function testAssertEqual(given, expected) {
+    if (given != expected) {
+        testErrorMessage("ASSERT", "Given " + given + " Expected " + expected)
+    }
+}
+
+function testErrorMessage(type, message) {
+    if (message == 'undefined') {
+        type = "UNDEFINED"
+        message = type;
+    }
+    alert("Failure on test. Message :  " + message)
+    consoleError(type, message)
 }
 
 function consoleError(type, message) {

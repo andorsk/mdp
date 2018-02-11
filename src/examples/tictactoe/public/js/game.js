@@ -23,7 +23,10 @@ function GameEngine(markovmodel, renderconfig) {
         this.getTurn = function() {
             return this.turnindex;
         }
-
+        this.Reset = function() {
+            this.board.Reset();
+            this.finished = false;
+        }
         this.getCurrentAgent = function() {
             return context.board.markovmodel.agents[context.turnindex]
         }
@@ -53,12 +56,13 @@ function GameEngine(markovmodel, renderconfig) {
     function nextTurn() {
         turnindex = turnindex + 1 >= markovmodel.agents.length ? 0 : turnindex + 1;
         context.turnindex = turnindex;
-        sendMessage(renderconfig.selector, board.getAgents()[context.turnindex].name + " turn.")
+        // sendMessage(renderconfig.selector, board.getAgents()[context.turnindex].name + " turn.")
         return turnindex;
     }
 
     function playRound() {
         var tick = 0;
+        context.Reset();
         while (!context.finished) {
             playTurn();
             if (tick > renderconfig.wblocks * renderconfig.hblocks) {
@@ -71,69 +75,153 @@ function GameEngine(markovmodel, renderconfig) {
     }
 
     this.playRound = function() {
+        console.log("PR")
         playRound();
     }
 
     this.train = function(iter = 1000) {
         var tick = 0;
-        playRound()
-        /* var tickiter = setInterval(function() {
-            //   playTurn();
+
+        var tickiter = setInterval(function() {
+            sendMessage(renderconfig.selector, "Round " + tick)
+            playRound();
             tick++;
-	    
+            console.log("Tick is " + tick)
             if (tick > iter) { //break 
                 clearInterval(tickiter)
                 isTerminated();
+                sendMessage("Done")
                 consoleMessage("Game is finished")
             }
-        }, 1000) */
+        }, 1000)
     }
 
     //checks the board for terminal states. There are a few examples of terminal cases.
     //1) If there is three in the row of a certain type.
     //2) If the board is filled. 
     function checkTerminalStates(context) {
-        if (checkFilled(context.board) && !Winner(context.board)) {
+        if (checkFilled(context.board) && !checkIfWinner(context.board)) {
             isTerminated();
+            console.log("No Winner")
             return 0;
-        } else if (checkFilled(context.board) && Winner(context.board)) {
-            var winner = Winner(game);
+        } else if (checkFilled(context.board) && checkIfWinner(context.board)) {
+            cosole.log("Winner")
             return 1;
         }
     }
 
-    function Winner(game) {
-        return false;
+    function checkIfWinner(game) {
+        //check each spot on the board
+        game.board.forEach(function(value, index, matrix) {
+            var idx = game.boardToIndex(index[0], index[1])
+            var cw = new checkWinner(game.getBoard())
+            if (cw.checkStraight(idx)) {
+
+                var agid = game.getBoard().subset(math.index(index[0], index[1])) //return the agent id
+                //           sendMessage(context.renderconfig.selector, "Agent " + agid + " wins")
+                sendMessage(renderconfig.selector, "Agent " + agid + " wins")
+                consoleMessage(agid + " wins the game!")
+                return agid
+            };
+        })
     }
 
     function isTerminated() {
-        sendMessage(board.renderconfig.selector, "Game is Done")
+        //sendMessage(board.renderconfig.selector, "Game is Done")
         consoleMessage("Terminating Game. It is finished")
         context.finished = true;
     }
 
     GameEngine.checkTerminalStates = checkTerminalStates;
 
+    function checkWinner(board) {
+        this.board = board;
+
+        this.checkStraight = function(idx) {
+            checkStraight(idx)
+        };
+
+        function checkStraight(idx) {
+
+            var vert = getVerticalForIdx(idx)
+            var horz = getHorizontalForIdx(idx)
+
+            console.log("For index " + idx + " vert is " + vert + " horz is " + horz)
+            if (!isNull(checkHomogeneousArray(vert)) || !isNull(checkHomogenousArray(horz))) {
+                return true;
+            } else return false;
+        }
+
+        function isNull(val) {
+            if (val == null) {
+                return true;
+            } else return false
+        }
+
+        function getVerticalForIdx(idx) {
+            var fboard = math.flatten(board).toArray()
+            var lidx = idx - context.board.wblocks;
+            var ridx = idx + context.board.wblocks;
+            if (!checkIdx(lidx) || !checkIdx(ridx)) {
+                return null;
+
+            }
+
+            console.log("right index returned is " + ridx)
+            return [fboard[lidx], fboard[idx], fboard[ridx]]
+        }
+
+        function getHorizontalForIdx(idx) {
+            var fboard = math.flatten(board).toArray()
+            var lidx = idx - 1
+            var ridx = idx + 1
+
+            if (!checkIdx(lidx) || !checkIdx(ridx)) {
+                return null;
+            }
+            return [fboard[lidx], fboard[idx], fboard[ridx]]
+        }
+
+        function checkOnLatBound(inx) {
+            return false;
+        }
+
+        function checkOnLongBound(idx) {
+            return false;
+        }
+
+        function checkHomogeneousArray(arr) {
+            if (arr == null) {
+                return null
+            }
+
+            var f = arr[1]
+
+            if (f == 0) {
+                return null
+            }
+
+            var comp = new Array(arr.length)
+            if (comp.fill(f) == arr) {
+                sendMessage(f + " wins!!")
+                return f;
+            } else return 0;
+        }
+
+        function checkIdx(idx) {
+            var board = context.board.getBoard();
+            if (idx < 0 || idx > 8) { //hardcoding 8
+                console.log("Invalid index at " + idx)
+                return false;
+            }
+            return true;
+        }
+    }
+
     //Doesn't need to be a 3x3 Board
     function check3ofAKind(game) {
         var board = game.getBoard();
         var cid;
-
-        checkForEachAgent();
-
-        function checkForEachAgent() {
-            consoleMessage("# of Agents " + game.getAgents().length);
-            board.forEach(function(value, index, matrix) {
-                var idx = game.boardToIndex(index[0], index[1])
-                for (var i = 0; i < game.getAgents().length; i++) {
-                    var currentagent = game.getAgents()[i];
-                    if (checkDiagnol(idx, currentagent.id) || checkStraight(idx, currentagent.id)) {
-                        return true;
-                    };
-
-                }
-            })
-        }
 
         //Only really need to check the latest agents move. 
         function checkDiagnol(idx, agid) {
@@ -148,6 +236,7 @@ function GameEngine(markovmodel, renderconfig) {
             }
         }
 
+
         function getDiagnolForIndex(idx) {
             var size = board.size()
             var fboard = math.flatten(board);
@@ -159,64 +248,6 @@ function GameEngine(markovmodel, renderconfig) {
                 return null;
             }
             return [fboard[lidx], fboard[idx], fboard[ridx]]
-        }
-
-        function checkStraight(idx, agid) {
-            var vert = getVerticalForIdx(idx)
-            var horz = getHoizontalForIdx(idx)
-
-            if (vert != null) {
-                for (var i = 0; i < vert.length; i++) {
-                    if (horz[i] != agid) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            if (horz != null) {
-                for (var i = 0; i < horz.length; i++) {
-                    if (horz[i] != agid) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-            return false;
-        }
-
-        function getVerticalForIdx(idx) {
-            var size = board.size();
-            var fboard = math.flatten(board)
-            var lidx = idx - board.size()[1]
-            var ridx = idx + board.size()[1]
-
-            if (!checkIdx(lidx) || !checkIdx(ridx)) {
-                return null;
-            }
-
-            return [fboard[lidx], fboard[idx], fboard[ridx]]
-        }
-
-        function getHorizonalForIdx(idx) {
-            var size = board.size();
-            var fboard = math.flatten(board)
-            var lidx = idx - 1
-            var ridx = idx + 1
-
-            if (!checkIdx(lidx) || !checkIdx(ridx)) {
-                return null;
-            }
-
-            return [fboard[lidx], fboard[idx], fboard[ridx]]
-
-        }
-
-        function checkIdxBounds(idx) {
-            if (idx < 0 || idx > (board.size()[1] * (board.size()[0] - 1))) {
-                return false;
-            }
-            return true;
         }
     }
 
