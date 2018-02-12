@@ -11,8 +11,18 @@ class Board extends Array {
         return constructor(height, width);
     }
 
+    flatten() {
+        var board = this.Get();
+        var ret = []
+        for (var i = 0; i < this.height; i++) {
+            for (var j = 0; j < this.width; j++) {
+                ret.push(board[i][j])
+            }
+        }
+        return ret;
+    }
     emptyCurrentBoard() {
-        setBoardArray(genEmptyBoard(this.height, this.width))
+        this.setBoardArray(this.genEmptyBoard(this.height, this.width))
     }
 
     //Generates an empty board. board is
@@ -37,6 +47,37 @@ class Board extends Array {
 
     getBoardArray() {
         return this.boardarray;
+    }
+
+    //Index convert to board position. For example:
+    //0,0 -> 0
+    //0,1 -> 1
+    //0,2 -> 2
+    //1,0 -> 3
+    //.
+    //.
+    //(row * wblocks) + column -> index
+    //col -> index % width
+    //row -> math.Floor(index) / width
+    //returns null if bad index
+    indexToBoard(idx) {
+        if (idx > ((this.width * this.height) - 1) || idx < 0) {
+            return null
+        }
+        var col = idx % this.width
+        var row = Math.floor(idx / this.width)
+        return [row, col]
+    }
+
+    //conversion above in the opposite direction
+    boardToIndex(col, row) {
+        return (this.width * row) + col
+    }
+
+
+    getFlattenedIndexValue(idx) {
+        var board = this.flatten()
+        return board[idx]
     }
 
 }
