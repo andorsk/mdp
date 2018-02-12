@@ -3,7 +3,20 @@ var markovmodel;
 var conf;
 
 $(document).ready(function() {
+    console.log("Running tests")
+    runTests();
+    //startGame();
+})
 
+
+function runTests() {
+    consoleMessage("Running tests")
+    waitUntilScriptLoaded("js/test.js")
+    TTTUnitTester.RunTests()
+}
+
+function startGame() {
+    console.log("Loaded " + testvar)
     consoleMessage("Starting the game tic-tac-toe")
     consoleMessage("Loading models...")
     loadScripts(); //async load of scripts 
@@ -71,7 +84,7 @@ $(document).ready(function() {
     game = new GameEngine(markovmodel, renderconfig);
     game.train(1);
 
-})
+}
 
 function initAgents(num, actions) {
     var agents = []

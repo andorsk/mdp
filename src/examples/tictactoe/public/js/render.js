@@ -7,6 +7,25 @@ because unless we want to assume a combinatorial block of ~216,000 state spaces,
 //board storage
 For optimzation, board storage should be a bit sequence for each player. Currently stores them as an array
 
+//2x2 array 
+
+//example index
+[
+[(0,0), (0,1), (0,2)],
+[(1,0), (1,1), (1,2)],
+[(2,0), (2,1), (2,2)]
+]
+
+//flattened array
+0,0 -> 0
+0,1 -> 1
+0,2 -> 2
+1,0 -> 3
+1,1 -> 4
+.
+.
+.
+2,2 -> 8
 */
 function TTTRenderEngine(markovmodel, renderconfig) {
 
