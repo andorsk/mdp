@@ -27,6 +27,20 @@ class LogicEngine {
         if (obj1 == null || obj2 == null) {
             return false;
         }
+
+        if (typeof obj1 != typeof obj2) {
+            showError("Incompatible comparision", "Not of the same type")
+        }
+
+        if (Array.isArray(obj1)) {
+            var o1 = obj1.filter(onlyUnique);
+            var o2 = obj2.filter(onlyUnique);
+
+            obj1 = o1.sort()
+            obj2 = o2.sort()
+        }
+
+
         return JSON.stringify(obj1) == JSON.stringify(obj2)
     }
 
@@ -42,10 +56,13 @@ class LogicEngine {
 
     //@input: nxn array. Assumes homogeneous characteristics. 
     //@output: array[indexloc] of edge pieces
-    static getEdgeMatrix(board) {
-        var w = board.length
-        var h = board[0].length
+    static getEdgeLocations(board) {
+
         var horizontal_borders = LogicEngine.getHorizontalBorderIndexArray(board)
+        var vertical_borders = LogicEngine.getVerticalBorderIndexArray(board)
+
+        var edges = horizontal_borders.concat(vertical_borders).unique()
+        return edges;
     }
 
     //get the vertical edges
@@ -75,7 +92,6 @@ class LogicEngine {
                 ret.push(loc)
             }
         }
-
         board.forEachNN(f)
         return ret;
     }

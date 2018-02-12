@@ -76,7 +76,7 @@ TTTUnitTester.TestLogic = function() {
         testAssertEqual(LogicEngine.JSONObjectEqual(checkVert(test3by3array), exp), true, " Not equal expected " + exp + " Given " + checkVert(test3by3array))
 
         sendMessage("Testing 4x3 Array")
-        var exp = [
+        exp = [
             [0, 0],
             [0, 3],
             [1, 0],
@@ -86,7 +86,7 @@ TTTUnitTester.TestLogic = function() {
         ]
         testAssertEqual(LogicEngine.JSONObjectEqual(checkHorz(test4by3array), exp), true, " Not equal expected " + exp + " Given " + checkHorz(test4by3array))
 
-        var exp = [
+        exp = [
             [0, 0],
             [0, 1],
             [0, 2],
@@ -100,7 +100,7 @@ TTTUnitTester.TestLogic = function() {
         testAssertEqual(LogicEngine.JSONObjectEqual(checkVert(test4by3array), exp), true, " Not equal expected " + exp + " Given " + checkVert(test4by3array))
 
         sendMessage("Testing 3x4 Array")
-        var exp = [
+        exp = [
             [0, 0],
             [0, 2],
             [1, 0],
@@ -113,7 +113,7 @@ TTTUnitTester.TestLogic = function() {
         ]
         testAssertEqual(LogicEngine.JSONObjectEqual(checkHorz(test3by4array), exp), true, " Not equal expected " + exp + " Given " + checkHorz(test3by4array))
 
-        var exp = [
+        exp = [
             [0, 0],
             [0, 1],
             [0, 2],
@@ -123,7 +123,25 @@ TTTUnitTester.TestLogic = function() {
         ]
 
         testAssertEqual(LogicEngine.JSONObjectEqual(checkVert(test3by4array), exp), true, " Not equal expected " + exp + " Given " + checkVert(test3by4array))
+
+        exp = [
+            [0, 0],
+            [0, 1],
+            [0, 2],
+            [1, 0],
+            [1, 2],
+            [3, 0],
+            [2, 0],
+            [2, 2],
+            [3, 1],
+            [3, 2]
+        ]
+
+        var edgeCheck = LogicEngine.getEdgeLocations
+        console.log("Testing edge")
+        testAssertEqual(LogicEngine.JSONObjectEqual(edgeCheck(test3by4array), exp), true, " Not equal to expected " + exp + " Given " + edgeCheck(test3by4array))
     }
+
 
     function iTestHomogeneousArrayChecker(array) {
         var tf = LogicEngine.checkHomogeneousArray;
