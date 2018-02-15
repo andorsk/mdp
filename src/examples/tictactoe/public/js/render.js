@@ -93,7 +93,7 @@ function TTTRenderEngine(renderconfig) {
                 .text(function(d) {
                     if (val in rules) {
                         return rules[val].marker
-                    } else return "NA"
+                    } else return
                 })
                 .style("font-size", function(d) {
                     if (val in rules && "markersize" in rules[val]) {

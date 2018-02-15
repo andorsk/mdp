@@ -3,6 +3,7 @@ Logic engine for game checkers. Wanted to keep it seperate because i hate long c
 */
 class LogicEngine {
 
+
     //checks if the entries in the function are homogenous. Returns true if they are. Array cannot be null. Will return false. 
     static checkHomogeneousArray(arr) {
         if (arr == null || arr.length == 0) {

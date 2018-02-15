@@ -112,29 +112,67 @@ class Board extends Array {
     }
 }
 
-class IndexRetreival {
+class IndexRetreiver {
 
-    static getVerticalForIdx(idx) {
-        var fboard = math.flatten(board).toArray()
-        var lidx = idx - context.board.wblocks;
-        var ridx = idx + context.board.wblocks;
-        if (!checkIdx(lidx) || !checkIdx(ridx)) {
-            return null;
-
-        }
-        console.log("right index returned is " + ridx)
-        return [fboard[lidx], fboard[idx], fboard[ridx]]
+    constructor(board) {
+        this.board = board;
+        this.arr = board.Get()
+        this.wblocks = board.width;
+        this.hblocks = board.height;
+        this.total = (board.width * board.height) - 1;
     }
 
-    static getHorizontalForIdx(idx) {
-        var fboard = math.flatten(board).toArray()
+    getIndexArrays(idx) {
+        var h = this.getHorizontalForIdx(idx)
+        var v = this.getVerticalForIdx(idx)
+        return [h, v]
+    }
+
+
+    getHorizontalForIdx(idx) {
+
+        var fboard = this.board.flatten()
         var lidx = idx - 1
         var ridx = idx + 1
 
-        if (!checkIdx(lidx) || !checkIdx(ridx)) {
+        if (!this.isInLine([lidx], [idx], [ridx])) {
             return null;
         }
         return [fboard[lidx], fboard[idx], fboard[ridx]]
+
+    }
+
+    getVerticalForIdx(idx) {
+
+        var fboard = this.board.flatten()
+        var lidx = idx - this.wblocks;
+        var ridx = idx + this.wblocks;
+
+        if (!this.isInLine([lidx], [idx], [ridx])) {
+            return null;
+        }
+
+        return [fboard[lidx], fboard[idx], fboard[ridx]]
+    }
+
+
+    isInLine(idxarray) {
+
+        var ph = null;
+        var pv = null;
+
+        for (var i = 0; i < idxarray.length; i++) {
+            var idx = idxarray[i];
+            var ch = (math.floor(idx / this.wblocks))
+            var cv = idx % this.blocks;
+            if ((ph != null && ch != pv) && (pv != null && cv != pv)) {
+                return false;
+            }
+            pv = cv;
+            ph = ch;
+        }
+
+        return true;
     }
 
     static getLDiagnoalForIndex(idx) {}

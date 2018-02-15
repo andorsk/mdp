@@ -14,6 +14,7 @@ function GameEngine(markovmodel, renderconfig) {
     //Set up context
     var context = new GameContext()
     var renderengine = new TTTRenderEngine(renderconfig)
+
     renderengine.Start();
     context.setRenderEngine(renderengine)
     context.setMarkovModel(markovmodel)
@@ -25,8 +26,25 @@ function GameEngine(markovmodel, renderconfig) {
         if (!placemarker(context, markerid)) {
             return;
         }
+
         context.getRenderEngine().Update(context.getBoard())
+        checkEnd()
         context.nextTurn()
+    }
+
+    function checkEnd() {
+
+        var result = TerminationEvaluator.checkTerminationStatus(context.getBoard())
+        if (result != null) {
+            var message = "";
+            if (result == "tie") {
+                message = "Game is a tie!"
+            } else {
+                message = "Winner is " + result
+            }
+            context.terminate()
+            sendMessage(renderconfig.selector, message)
+        }
     }
 
     function playTurn() {
@@ -41,9 +59,9 @@ function GameEngine(markovmodel, renderconfig) {
         });
 
         rendereng.Update();
-        //checkTerminalStates(context);
         context.nextTurn();
     }
+
 
     function playRound() {
         var tick = 0;
@@ -64,12 +82,7 @@ function GameEngine(markovmodel, renderconfig) {
         var tickiter = setInterval(function() {
             sendMessage(renderconfig.selector, "Round " + tick)
             //    playRound();
-            playMarker(context.getCurrentAgent(), 0)
-            playMarker(context.getCurrentAgent(), 1)
-            playMarker(context.getCurrentAgent(), 1)
-            playMarker(context.getCurrentAgent(), 3)
-            playMarker(context.getCurrentAgent(), 4)
-            playMarker(context.getCurrentAgent(), 6)
+
             tick++;
             console.log("Tick is " + tick)
             if (tick > iter) { //break 
@@ -157,6 +170,7 @@ class GameContext {
     nextTurn() {
         var turn = this.getTurn() + 1 >= this.markovmodel.agents.length ? 0 : this.getTurn() + 1;
         this.setTurn(turn)
+
     }
 
     terminate() {
@@ -172,13 +186,53 @@ class GameContext {
 //2. An agent has 3 in a row. 
 class TerminationEvaluator {
 
-    static checkIna3Row(idx) {
-        var vert = getVerticalForIdx(idx)
-        var horz = getHorizontalForIdx(idx)
-        var ldiag = getLDiagnoalForIndex(idx)
-        var rdiag = getRDiagnoalForIndex(idx)
-        console.log("For index " + idx + " vert is " + vert + " horz is " + horz + " board is " + board)
-        return (LogicEngine.checkHomogeneousArray(vert) || LogicEngine.checkHomogenousArray(horz))
+    constructor(board) {
+        this.board = board;
+        this.results = null;
+    }
+
+    clearResults() {
+        this.results = null;
+    }
+
+
+    static checkTerminationStatus(board) {
+
+        var checkWinner = TerminationEvaluator.checkWinner;
+        var checkFilled = TerminationEvaluator.checkFilled;
+
+        var result = null;
+        //if board is filled and no winner, then the result is a tie.
+        if (checkFilled(board) && checkWinner(board) == null) {
+            result = "tie"
+        }
+
+        //check for a winer
+        if (checkWinner(board) != null) {
+            result = checkWinner(board)
+        }
+
+        return result;
+    }
+
+    static checkWinner(board) {
+        for (var i = 0; i < ((board.width * board.height) - 1); i++) {
+            if (TerminationEvaluator.checkRow(board, i) != null) {
+                return board.flatten()[i]
+            }
+        }
+        return null;
+    }
+
+    static checkRow(board, idx) {
+        var vr = new IndexRetreiver(board);
+        var iarr = vr.getIndexArrays(idx)
+        for (var i = 0; i < iarr.length; i++) {
+            if (LogicEngine.checkHomogeneousArray(iarr[i])) {
+                return board.flatten()[idx]
+            }
+        }
+        return null;
     }
 
     static checkFilled(board) {
@@ -186,14 +240,4 @@ class TerminationEvaluator {
         return board.boardAllDifferent(bbb)
     }
 
-    static checkTerminalStates(context) {
-        if (checkFilled(context.board) && !checkIfWinner(context.board)) {
-            isTerminated();
-            console.log("No Winner")
-            return 0;
-        } else if (checkFilled(context.board) && checkIfWinner(context.board)) {
-            cosole.log("Winner")
-            return 1;
-        }
-    }
 };
