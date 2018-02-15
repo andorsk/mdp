@@ -33,14 +33,12 @@ class LogicEngine {
         }
 
         if (Array.isArray(obj1)) {
-            var o1 = obj1.filter(onlyUnique);
-            var o2 = obj2.filter(onlyUnique);
+            var obj1 = onlyUniqueItemsFromArray(obj1)
+            var obj2 = onlyUniqueItemsFromArray(obj2)
 
-            obj1 = o1.sort()
-            obj2 = o2.sort()
+            obj1 = obj1.sort()
+            obj2 = obj2.sort()
         }
-
-
         return JSON.stringify(obj1) == JSON.stringify(obj2)
     }
 

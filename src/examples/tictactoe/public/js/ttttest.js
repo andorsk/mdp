@@ -10,11 +10,29 @@ class TTTUnitTester {
     static RunTests() {
         // this.TestTermination();
         this.TestLogic();
+        this.TestBoard();
     }
-
 }
 
 
+TTTUnitTester.TestBoard = function() {
+    runtests()
+
+    function runtests() {
+        console.log("Running tests for Board")
+        iTestBoardCreation();
+    }
+
+    function iTestBoardCreation() {
+        consoleMessage("INFO", "Testing Board Creation")
+        var board = new Board(5, 5).Get()
+        var arr = new Array(5)
+        for (var i = 0; i < arr.length; i++) {
+            arr.fill(new Array(5))
+        }
+        testAssertEqual(LogicEngine.JSONObjectEqual(arr, board), true, " Not equal expected " + arr + " Given " + board)
+    }
+}
 
 TTTUnitTester.TestLogic = function() {
 
@@ -28,7 +46,7 @@ TTTUnitTester.TestLogic = function() {
 
 
     function iTestBorderMatrix() {
-        sendMessage("Testing Border Logic")
+        consoleMessage("Testing Border Logic")
 
         const test3by3array = [
             [0, 1, 2],
@@ -53,7 +71,7 @@ TTTUnitTester.TestLogic = function() {
         var checkHorz = LogicEngine.getHorizontalBorderIndexArray
         var checkVert = LogicEngine.getVerticalBorderIndexArray
 
-        sendMessage("Testing 3x3 Array")
+        consoleMessage("Testing 3x3 Array")
         var exp = [
             [0, 0],
             [0, 2],
@@ -75,7 +93,7 @@ TTTUnitTester.TestLogic = function() {
 
         testAssertEqual(LogicEngine.JSONObjectEqual(checkVert(test3by3array), exp), true, " Not equal expected " + exp + " Given " + checkVert(test3by3array))
 
-        sendMessage("Testing 4x3 Array")
+        consoleMessage("Testing 4x3 Array")
         exp = [
             [0, 0],
             [0, 3],
@@ -99,7 +117,7 @@ TTTUnitTester.TestLogic = function() {
         ]
         testAssertEqual(LogicEngine.JSONObjectEqual(checkVert(test4by3array), exp), true, " Not equal expected " + exp + " Given " + checkVert(test4by3array))
 
-        sendMessage("Testing 3x4 Array")
+        consoleMessage("Testing 3x4 Array")
         exp = [
             [0, 0],
             [0, 2],
@@ -138,8 +156,9 @@ TTTUnitTester.TestLogic = function() {
         ]
 
         var edgeCheck = LogicEngine.getEdgeLocations
-        console.log("Testing edge")
+        consoleMessage("Testing edge")
         testAssertEqual(LogicEngine.JSONObjectEqual(edgeCheck(test3by4array), exp), true, " Not equal to expected " + exp + " Given " + edgeCheck(test3by4array))
+        testAssertEqual(LogicEngine.JSONObjectEqual(edgeCheck(test4by3array), exp), false, " Not equal to expected " + exp + " Given " + edgeCheck(test4by3array))
     }
 
 

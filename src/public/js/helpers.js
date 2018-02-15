@@ -135,7 +135,7 @@ function exit(status) {
         'abort', 'close', 'dragdrop', 'load', 'paint', 'reset', 'select', 'submit', 'unload'
     ];
 
-    bfunction stopPropagation(e) {
+    function stopPropagation(e) {
         e.stopPropagation();
         // e.preventDefault(); // Stop for the form controls, etc., too?
     }
@@ -200,18 +200,70 @@ function consoleMessageSimple(message) {
     console.log(Date.now() + " : " + " Message: " + message)
 }
 
-function testAssertEqual(given, expected) {
+
+function isNull(val) {
+    if (val == null) {
+        return true;
+    } else return false
+}
+
+
+function testAssertEqual(given, expected, mm) {
     if (given != expected) {
-        testErrorMessage("ASSERT", "Given " + given + " Expected " + expected)
+        var m = "Given: " + given + " Expected: " + expected;
+        if (message != null) {
+            m = m.concat(" Message: " + mm)
+        }
+        testErrorMessage("ASSERT", m)
     }
 }
+
+//loop through a multidimensional array
+//callback function takes (loc, val)
+Array.prototype.forEachNN = function(callback) {
+    for (var i = 0; i < this.length; i++) {
+        for (var j = 0; j < this[i].length; j++) {
+            callback([i, j], this[i][j])
+        }
+    }
+}
+
+Array.prototype.unique = function() {
+    var a = this.concat();
+    for (var i = 0; i < a.length; ++i) {
+        for (var j = i + 1; j < a.length; ++j) {
+            if (a[i] === a[j])
+                a.splice(j--, 1);
+        }
+    }
+
+    return a;
+};
+
+
+
+//@input: 
+//@return: index
+function onlyUniqueItemsFromArray(arr) {
+    var map = {}
+    arr.forEach(function(cv, index, arr) {
+        map[cv] = true;
+    })
+
+    var ret = []
+    for (var element in map) {
+        ret.push(element)
+    }
+    return ret;
+}
+
 
 function testErrorMessage(type, message) {
     if (message == 'undefined') {
         type = "UNDEFINED"
         message = type;
     }
-    alert("Failure on test. Message :  " + message)
+    // alert("Failure on test. Message :  " + message)
     consoleError(type, message)
 }
 

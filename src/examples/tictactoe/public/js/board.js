@@ -21,6 +21,7 @@ class Board extends Array {
         }
         return ret;
     }
+
     emptyCurrentBoard() {
         this.setBoardArray(this.genEmptyBoard(this.height, this.width))
     }
@@ -31,8 +32,14 @@ class Board extends Array {
     //Where [i] indicates row and board[0][i] indicates column
     genEmptyBoard(hblocks, wblocks) {
         var empty = new Array(hblocks)
-        empty.fill(new Array(wblocks))
+        for (var i = 0; i < empty.length; i++) {
+            empty[i] = new Array(wblocks)
+        }
         return empty;
+    }
+
+    static genEmptyBoard(hblocks, wblocks) {
+        return genEmptyBoard(hblocks, wblocks)
     }
 
     //getters and setters 
@@ -70,14 +77,67 @@ class Board extends Array {
     }
 
     //conversion above in the opposite direction
-    boardToIndex(col, row) {
+    boardToIndex(row, col) {
+        console.log("Col " + col + "  other " + (this.width * row))
         return (this.width * row) + col
     }
 
+    setBoardValue(row, col, val) {
+        this.Get()[row][col] = val
+        console.log("New board is " + JSON.stringify(this.Get()))
+    }
 
     getFlattenedIndexValue(idx) {
         var board = this.flatten()
         return board[idx]
     }
 
+    // comparision function that compares the current board to another board
+    // compares each index spot
+    boardAllDifferent(otherboard) {
+        var orig = flatten(this.boardarray)
+        var comp = flatten(otherboard)
+
+        if (orig.length != comp.length) {
+            consoleError("Array Comparision Error", "Error comparing arrays. They are of different length")
+        }
+
+        for (var i = 0; i < orig.length; i++) {
+            if (orig[i] == comp[i]) {
+                return false;
+            }
+        }
+        consoleMessage("Board is terminated")
+        return true;
+    }
+}
+
+class IndexRetreival {
+
+    static getVerticalForIdx(idx) {
+        var fboard = math.flatten(board).toArray()
+        var lidx = idx - context.board.wblocks;
+        var ridx = idx + context.board.wblocks;
+        if (!checkIdx(lidx) || !checkIdx(ridx)) {
+            return null;
+
+        }
+        console.log("right index returned is " + ridx)
+        return [fboard[lidx], fboard[idx], fboard[ridx]]
+    }
+
+    static getHorizontalForIdx(idx) {
+        var fboard = math.flatten(board).toArray()
+        var lidx = idx - 1
+        var ridx = idx + 1
+
+        if (!checkIdx(lidx) || !checkIdx(ridx)) {
+            return null;
+        }
+        return [fboard[lidx], fboard[idx], fboard[ridx]]
+    }
+
+    static getLDiagnoalForIndex(idx) {}
+
+    static getRDiagnoalForIndex(idx) {}
 }

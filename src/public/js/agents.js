@@ -30,7 +30,6 @@ Agent.prototype.setActionSet = function(actions) {
 
 Agent.prototype.setMessageCost = function(cost) {
     this.messagecost = cost;
-    []
 }
 
 Agent.prototype.getId = function() {
@@ -91,7 +90,7 @@ Agent.prototype.ActHandler = function(action, stateprime) {
 
 //Exploration function returns a state which is stateprime. . 
 Agent.prototype.Explore = function(explorationfunction) {
-    var stateprime = explorationfunction();
+    var stateprime = explorationfunction(this, context);
     return stateprime;
 }
 

@@ -2,10 +2,11 @@ var game; //global accessors
 var markovmodel;
 var conf;
 
+
 $(document).ready(function() {
     console.log("Running tests")
     runTests();
-    //startGame();
+    startGame();
 })
 
 
@@ -16,11 +17,9 @@ function runTests() {
 }
 
 function startGame() {
-    console.log("Loaded " + testvar)
     consoleMessage("Starting the game tic-tac-toe")
     consoleMessage("Loading models...")
     loadScripts(); //async load of scripts 
-
 
     //Render Config Settings
     var renderconfig = {
@@ -56,6 +55,8 @@ function startGame() {
         }
     }
 
+    renderconfig["rules"] = rules;
+
     //  sendMessage(renderconfig.selector, "Loading Board")
     waitUntilScriptLoaded("js/config.js")
 
@@ -78,9 +79,9 @@ function startGame() {
         markovmodel.agents[i].mdp.agents = [agents[i]]
         markovmodel.agents[i].jointmdp = markovmodel;
     }
-    //    sendMessage(renderconfig.selector, "Starting Game")
-    consoleMessage("Starting the game")
 
+    //start the game
+    consoleMessage("Starting the game")
     game = new GameEngine(markovmodel, renderconfig);
     game.train(1);
 
@@ -99,6 +100,6 @@ function initAgents(num, actions) {
 
 
 function initActions() {
-    var a = new Action(0, "PlaceMarker", AgentTTTActions.PlaceMarker, "Agent Will Place Marker");
+    var a = new Action(0, "PlaceMarker", action = AgentTTTActions.PlaceMarker, "Agent Will Place Marker");
     return [a]
 }
