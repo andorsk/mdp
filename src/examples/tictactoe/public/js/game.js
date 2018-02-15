@@ -22,7 +22,9 @@ function GameEngine(markovmodel, renderconfig) {
 
     function playMarker(agent, markerid) {
         var placemarker = agent.actionset[0].action
-        placemarker(context, markerid)
+        if (!placemarker(context, markerid)) {
+            return;
+        }
         context.getRenderEngine().Update(context.getBoard())
         context.nextTurn()
     }
@@ -64,6 +66,10 @@ function GameEngine(markovmodel, renderconfig) {
             //    playRound();
             playMarker(context.getCurrentAgent(), 0)
             playMarker(context.getCurrentAgent(), 1)
+            playMarker(context.getCurrentAgent(), 1)
+            playMarker(context.getCurrentAgent(), 3)
+            playMarker(context.getCurrentAgent(), 4)
+            playMarker(context.getCurrentAgent(), 6)
             tick++;
             console.log("Tick is " + tick)
             if (tick > iter) { //break 
@@ -85,6 +91,10 @@ function GameEngine(markovmodel, renderconfig) {
 
     this.train = function(iter = 1000) {
         train(iter);
+    }
+
+    this.playMarker = function(idx) {
+        playMarker(context.getCurrentAgent(), idx)
     }
 
     this.playTurn = function() {
@@ -172,8 +182,8 @@ class TerminationEvaluator {
     }
 
     static checkFilled(board) {
-        var emptyboard = Board.genEmptyBoard();
-        return boardAllDifferent(emptyboard, board)
+        var bbb = new Board(board.height, board.width)
+        return board.boardAllDifferent(bbb)
     }
 
     static checkTerminalStates(context) {

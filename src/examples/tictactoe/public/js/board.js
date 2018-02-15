@@ -95,8 +95,8 @@ class Board extends Array {
     // comparision function that compares the current board to another board
     // compares each index spot
     boardAllDifferent(otherboard) {
-        var orig = flatten(this.boardarray)
-        var comp = flatten(otherboard)
+        var orig = this.flatten()
+        var comp = otherboard.flatten()
 
         if (orig.length != comp.length) {
             consoleError("Array Comparision Error", "Error comparing arrays. They are of different length")
