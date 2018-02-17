@@ -25,6 +25,14 @@
          this.occupiedagent = agent;
      }
 
+     this.getStateDefinition() {
+         return this.object;
+     }
+
+     this.addStateInfo(key, value) {
+         this.object[key] = value;
+     }
+
      this.setAgentOccupiedIfOpen = function(agent) {
          console.log("is board state open")
          if (!this.isOccupied()) {

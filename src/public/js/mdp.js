@@ -14,6 +14,76 @@ actions = [] an array of available actions assumes
 All history functions are used for development. No production. 
 See the config.js to generate a base config. 
 */
+class MDP {
+
+    constructor(states, actions, agents, config) {
+        this.state = states;
+        this.actions = actions;
+        this.agents = agents;
+        this.config = config;
+        this.activeagents = {}
+        this.id = guid()
+        this.approx_method = config.settings['approx_method'];
+        this.statelookup = {}
+        this.pushExisitingStates();
+        this.pushExistingAgents();
+        this.observationlikelihood = config.settings.observationlikeliehood;
+        this.policymap = {}; //for each state there must be a policy
+
+        /*
+         Transition matrix with s, a, s'. Accepts type transition
+              s' 
+           s__|   = P(s'|s,a) 
+               \ 
+                a      
+         We have a choice to store it as a 3x3 matrix or nested map.
+         Size is state * action * state' 
+         */
+        this.transitionmatrix = null;
+        this.transitionmatrixhistory = [] //storing the transition matrix history for debugging purposes. 
+
+        // QMatrix denotes the probability for each transition. It is the estimated of the future value..  
+        this.qmatrix;
+        this.qmatrixhistory = [] //for debugging purposes. Should remain empty in production. 
+
+        //The observation function is the likeliehood of observing o when action a is taken to transitoin to s'.
+        this.observationmatrix;
+        this.observationmatrixhistory = [];
+
+        /*A belief state is a probability distribution over states 
+          that summarize the knowledge of the agents of a given point.
+          It is updated via Bayesian logic.
+          The belief state matrix is the probability of a the next belief of b' given a belief and an action. 
+         */
+        this.believestatematrix = null;
+        this.beliefstatehistory = []
+
+        // Decay rate is also called the dicount factor. Incrase this to increase the weight of past values in the value iteration cycle. 
+        this.decayrate = config.settings.decayrate;
+
+        //Joint actions and observations are the shared actions and observations by the interation of the agents. 
+        this.jointactions = null;
+        this.jointobservations = null;
+
+        //Messsage are the sum of atomic messages sent by agent i 
+        this.messages = []
+    }
+
+    pushExistingStates() {
+        for (var i = 0; i < this.states.length; i++) {
+            this.statelookup[JSON.stringify(states[i].getStateDefinition())] = true;
+        }
+    }
+
+    static init3DepthMatrix(depth1, depth2, depth3) {
+        var qmatrix = [new Array(depth1.length), new Array(depth2.length), new Array(depth3.length)]
+        return qmatrix;
+    }
+
+}
+
+
+
 function MDP(states, actions, agents, config) {
 
     this.config = config;
@@ -21,56 +91,17 @@ function MDP(states, actions, agents, config) {
     this.actions = actions;
     this.agents = agents;
     this.appox_method = config.settings["approx_method"];
-    this.id = guid(); //generate a guid. collision nearly impossible. 
+    this.id = guid();
+
+    //trackers
     this.activeagents = {}; // a mapping to keep track of if the agent is active or not.
-    // Game parameters and tracks. Most of these should eventually be turned into game parameters.
     this.statelookup = {};
+
     for (var i = 0; i < states.length; i++) {
         this.statelookup[JSON.stringify(states[i])] = true;
     }
-    var observationlikelihood = config.settings.observationlikeliehood;
-    var turn = 0;
 
-    //for each state there must be a policy
-    var policymap = {};
 
-    /*
-     Transition matrix with s, a, s'. Accepts type transition
-          s' 
-       s__|   = P(s'|s,a) 
-           \ 
-            a      
-     We have a choice to store it as a 3x3 matrix or nested map.
-     Size is state * action * state' 
-     */
-    var transitionmatrix;
-    var transitionmatrixhistory = [] //storing the transition matrix history for debugging purposes. 
-
-    // QMatrix denotes the probability for each transition. It is the estimated of the future value..  
-    var qmatrix;
-    var qmatrixhistory = [] //for debugging purposes. Should remain empty in production. 
-
-    //The observation function is the likeliehood of observing o when action a is taken to transitoin to s'.
-    var observationmatrix;
-    var observationmatrixhistory = [];
-
-    /*A belief state is a probability distribution over states 
-      that summarize the knowledge of the agents of a given point.
-	    It is updated via Bayesian logic.
-      The belief state matrix is the probability of a the next belief of b' given a belief and an action. 
-      */
-    var believestatematrix;
-    var beliefstatehistory = []
-
-    // Decay rate is also called the dicount factor. Incrase this to increase the weight of past values in the value iteration cycle. 
-    var decayrate = config.settings.decayrate;
-
-    //Joint actions and observations are the shared actions and observations by the interation of the agents. 
-    var jointactions;
-    var jointobservations;
-
-    //Messsage are the sum of atomic messages sent by agent i 
-    var messages = []
 
 
     //create a list of active agents. Assuming all agents are active at the start. 

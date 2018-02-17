@@ -10,7 +10,63 @@
 //max manhattan distance for opposing player
 //min manhattan distance for current agent
 //max manhattan distance for current agent
-function BoardToStateRepresentation(game) {
+class BoardToState {
+
+    constructor(board) {
+        this.board = board;
+        this.calculate()
+        return this.convertToState(id)
+    }
+
+    static calculate(board) {
+        var totalpieces = BoardToState.countBoardPieces(board)
+        var rowpieces = BoardToState.countPiecesInRows(board)
+        var boardarray = board.Get()
+    }
+
+    calculate() {
+        this.boardarr = this.board.Get()
+        this.boardpiecesnum = this.countBoardPieces();
+        this.rowpiecenumber = this.countPiecesInRows();
+    }
+
+    //need to pass an id
+    convertToStateObject(id) {
+
+        if (id == 'undefined') {
+            consoleError("INVALID", "ID not specified")
+            return
+        }
+        var id = 1;
+        return new State(id, id, this);
+    }
+
+    //Count the total number of board pieces
+    countBoardPieces() {
+        BoardToState.countBoardPieces(this.board)
+    }
+
+    static countBoardPieces(board) {
+        return board.flatten().filter(Object).length
+    }
+
+    //Count # of pieces in columns and rows
+    countPiecesInRows() {
+        return BoardToState.countPiecesInRows(this.board)
+    }
+
+    static countPiecesInRows(board) {
+        var boardarr = board.Get()
+        var res = {}
+        for (var i = 0; i < boardarr.length; i++) {
+            res[i] = boardarr[i].filter(Object).length
+        }
+        return res
+    }
+}
+
+
+static BoardToStateRepresentation(game) {
     var board = game.board;
     var markovmodel = game.markovmodel;
 
@@ -24,8 +80,6 @@ function BoardToStateRepresentation(game) {
     this.maxmanhattandistanceforopposingplayer = manhattanDistanceForPlayer(this.currentAgentID, board)[1]
     this.avgmanhattandistanceforopposingplayer = manhattanDistanceForPlayer(this.currentAgentID, board)[2]
 
-
-
     //returns the min, max, and average manhattan distance beween current players pieces as a tuple
     function manhattanDistanceForPlayer(playerid, board) {
         return [1, 1, 1]
@@ -33,14 +87,16 @@ function BoardToStateRepresentation(game) {
 
     //count the number of pieces on the board
     function countBoardPieces(board) {
-        return 10
+        return board.flatten().filter(String).length
     }
 
+    this.countBoardPieces = function() {
+        return countBoardPieces(this.board)
+    }
     //count the number of pieces on a column
     function countBoardPiecesOnColumn(board, col) {
         return 3
     }
-
 
     //adding state is a little different than the grid game because we don't know how many states there will be. We don't want to have redundant states. 
     /* var strver = JSON.stringify(this)
@@ -52,4 +108,9 @@ function BoardToStateRepresentation(game) {
     //markovmodel.statelookup[strver] = state
     return state;
 
+}
+
+
+BoardToStateRepresentation.prototype.countBoardPieces = function(board) {
+    return board.flatten().filter(String).length
 }
