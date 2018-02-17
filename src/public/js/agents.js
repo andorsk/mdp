@@ -89,8 +89,10 @@ Agent.prototype.ActHandler = function(action, stateprime) {
 }
 
 //Exploration function returns a state which is stateprime. . 
-Agent.prototype.Explore = function(explorationfunction) {
-    var stateprime = explorationfunction(this, context);
+Agent.prototype.Explore = function(explorationfunction, context) {
+
+    var stateprime = explorationfunction(context);
+
     return stateprime;
 }
 
@@ -148,7 +150,7 @@ Agent.prototype.setState = function(state) {
 Agent.prototype.executeAction = function(action, context) {
     this.currentaction = action; //needed so that the action index can be queried later. 
 
-    if (Math.random() <= context.noise) {
+    if (Math.random() <= context.noise && context.noise != 'undefined') {
         //choose new action
         var newaction = action;
         while (newaction == action) {

@@ -7,8 +7,12 @@ class Board extends Array {
         this.boardarray = this.genEmptyBoard(height, width)
     }
 
+    Reset() {
+        this.boardarray = this.genEmptyBoard(this.height, this.width)
+    }
+
     New(height, width) {
-        return constructor(height, width);
+        return new Board.call(this.height, this.width);
     }
 
     flatten() {
@@ -78,13 +82,11 @@ class Board extends Array {
 
     //conversion above in the opposite direction
     boardToIndex(row, col) {
-        console.log("Col " + col + "  other " + (this.width * row))
         return (this.width * row) + col
     }
 
     setBoardValue(row, col, val) {
         this.Get()[row][col] = val
-        console.log("New board is " + JSON.stringify(this.Get()))
     }
 
     getFlattenedIndexValue(idx) {
@@ -135,7 +137,7 @@ class IndexRetreiver {
         var lidx = idx - 1
         var ridx = idx + 1
 
-        if (!this.isInLine([lidx], [idx], [ridx])) {
+        if (!this.isInLine([lidx, idx, ridx])) {
             return null;
         }
         return [fboard[lidx], fboard[idx], fboard[ridx]]
@@ -148,7 +150,7 @@ class IndexRetreiver {
         var lidx = idx - this.wblocks;
         var ridx = idx + this.wblocks;
 
-        if (!this.isInLine([lidx], [idx], [ridx])) {
+        if (!this.isInLine([lidx, idx, ridx])) {
             return null;
         }
 
@@ -165,11 +167,13 @@ class IndexRetreiver {
             var idx = idxarray[i];
             var ch = (math.floor(idx / this.wblocks))
             var cv = idx % this.blocks;
-            if ((ph != null && ch != pv) && (pv != null && cv != pv)) {
+
+            if ((ph != null && ch != ph) && (pv != null && cv != pv)) {
                 return false;
             }
             pv = cv;
             ph = ch;
+
         }
 
         return true;

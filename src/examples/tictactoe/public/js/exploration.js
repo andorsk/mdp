@@ -8,8 +8,6 @@ class TTTExploration {
     static RandomChoice(context) {
 
         var board = context.getBoard()
-        var agent = context.getCurrentAgent();
-
         var boardsize = board.height * board.width
         var chosen = false;
 
@@ -18,10 +16,11 @@ class TTTExploration {
         while (chosen == false) { //go until a valid move
             attempts++; //for debugging
             var randomIdx = Math.floor(Math.random() * boardsize)
-            if (AgentTTTActions.PlaceMarker(agent, randomIdx) || attempts > 100) {
+            if (AgentTTTActions.PlaceMarker(context, randomIdx) || attempts > 30) {
                 chosen = true;
             }
         }
+        return context.getBoard();
     }
 
 
