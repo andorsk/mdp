@@ -20,6 +20,13 @@ function GameEngine(markovmodel, renderconfig) {
     context.setMarkovModel(markovmodel)
     this.context = context;
 
+    this.getContext = function() {
+        return getContext();
+    }
+
+    function getContext() {
+        return context;
+    }
 
     function playMarker(agent, markerid) {
         var placemarker = agent.actionset[0].action
@@ -48,17 +55,11 @@ function GameEngine(markovmodel, renderconfig) {
     }
 
     function playTurn() {
-
-        var agent = context.getCurrentAgent();
-        var board = context.getBoard();
-        var rendereng = context.getRenderEngine();
-
-        consoleMessage(agent.name + "'s Turn")
-        var stateprime = agent.Explore(function() {
-            TTTExploration.RandomChoice(context) //change this to change the exploration
-        });
-
-        rendereng.Update();
+        console.log("Playing turn")
+        var explore = TTTExploration.RandomChoice
+        getContext().getCurrentAgent().Explore(explore, context)
+        renderengine.Update();
+        checkEnd()
         context.nextTurn();
     }
 
@@ -66,7 +67,7 @@ function GameEngine(markovmodel, renderconfig) {
     function playRound() {
         var tick = 0;
         context.Reset();
-        while (!context.finished) {
+        while (!context.isFinished()) {
             playTurn();
             if (tick > renderconfig.wblocks * renderconfig.hblocks) {
                 consoleError("Failed to Finish Game")
@@ -77,11 +78,13 @@ function GameEngine(markovmodel, renderconfig) {
     }
 
     function train(iter = 1000) {
-        var tick = 0;
+        var tick = 1;
 
         var tickiter = setInterval(function() {
             sendMessage(renderconfig.selector, "Round " + tick)
-            //    playRound();
+            // playTurn();
+
+            playRound();
 
             tick++;
             console.log("Tick is " + tick)
@@ -158,9 +161,8 @@ class GameContext {
 
     //reset the entire game
     Reset() {
-        if (this.board != null) {
-            this.getBoard().Reset()
-        }
+        this.getRenderEngine().Reset()
+        this.isfinished = false;
     }
 
     getCurrentAgent() {
@@ -173,9 +175,13 @@ class GameContext {
 
     }
 
+    isFinished() {
+        return this.isfinished;
+    }
+
     terminate() {
         consoleMessage("Game is finished")
-        this.finished = true;
+        this.isfinished = true;
     }
 
 }

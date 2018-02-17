@@ -160,19 +160,16 @@ function TTTRenderEngine(renderconfig) {
 
     //-------------------- Update Functions--------------------------//
 
-    this.Update = function(board) {
-        console.log("Updating board " + board)
+    this.Update = function() {
         ticks++;
         clearBoard();
         clearMarkers();
         drawboard();
     }
 
-    this.Reset = function(board) {
-        clearBoard();
-        clearMarkers();
-        drawboard();
-        this.Start();
+    this.Reset = function() {
+        this.board.Reset();
+        this.Update();
     }
 
     this.Start = function() {
