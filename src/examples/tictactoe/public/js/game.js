@@ -33,6 +33,7 @@ function GameEngine(markovmodel, renderconfig) {
     //Tie = 0
     //Lose = -1;
     function getReward(res, agent) {
+
         var reward;
         switch (res) {
             case "tie":
@@ -53,49 +54,34 @@ function GameEngine(markovmodel, renderconfig) {
 
 
     function playMarker(agent, markerid) {
-        var placemarker = agent.actionset[0].action
-        if (!placemarker(context, markerid)) {
-            return;
-        }
 
+        console.log("playing marker")
+        var placemarker = agent.actionset[0]
+
+        agent.executeAction(placemarker, {}, context, markerid)
         context.getRenderEngine().Update(context.getBoard())
+
         var reward = checkEnd()
         context.nextTurn()
     }
 
-    function checkEnd() {
-
-        var reward = null;
-        var result = TerminationEvaluator.checkTerminationStatus(context.getBoard())
-        if (result != null) {
-            var message = "";
-            if (result == "tie") {
-                message = "Game is a tie!"
-            } else {
-                message = "Winner is " + result
-            }
-            context.terminate()
-            sendMessage(renderconfig.selector, message)
-        }
-
-        return getReward(result)
-    }
-
     function playTurn() {
-        console.log("Playing turn")
-        var explore = TTTExploration.RandomChoice
-        getContext().getCurrentAgent().Explore(explore, context)
+
+        getContext().getCurrentAgent().Explore(TTTExploration.RandomChoice, context)
         renderengine.Update();
-        checkEnd()
+        checkEnd();
         context.nextTurn();
     }
 
 
     function playRound() {
+
         var tick = 0;
         context.Reset();
+
         while (!context.isFinished()) {
             playTurn();
+
             if (tick > renderconfig.wblocks * renderconfig.hblocks) {
                 consoleError("Failed to Finish Game")
                 break;
@@ -109,8 +95,6 @@ function GameEngine(markovmodel, renderconfig) {
 
         var tickiter = setInterval(function() {
             sendMessage(renderconfig.selector, "Round " + tick)
-            // playTurn();
-
             playRound();
 
             tick++;
@@ -122,6 +106,20 @@ function GameEngine(markovmodel, renderconfig) {
         }, 1000)
     }
 
+    function checkEnd() {
+        var reward = null;
+        var result = TerminationEvaluator.checkTerminationStatus(context.getBoard())
+        if (result != null) {
+            var message = "";
+            if (result == "tie") {
+                message = "Game is a tie!"
+            } else {
+                message = "Winner is " + result
+            }
+            context.terminate()
+            sendMessage(renderconfig.selector, message)
+        }
+    }
     //public wrappers
     this.nextTurn = function() {
         nextTurn();;
@@ -163,6 +161,10 @@ class GameContext {
         return this.renderengine;
     }
 
+    getMarkovModel() {
+        return this.markovmodel;
+    }
+
     getBoard() {
         return this.getRenderEngine().board;
     }
@@ -190,6 +192,7 @@ class GameContext {
     Reset() {
         this.getRenderEngine().Reset()
         this.isfinished = false;
+        this.setTurn(0)
     }
 
     getCurrentAgent() {

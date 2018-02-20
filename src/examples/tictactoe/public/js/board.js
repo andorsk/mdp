@@ -15,20 +15,6 @@ class Board extends Array {
         return new Board.call(this.height, this.width);
     }
 
-    inferNextPlayer() {
-        var board = this.Get()
-        var map = {}
-
-        function addToMap(loc, key) {
-            var val = map.hasOwnProperty(key) ? map[key] + 1 : 1
-            map[key] = val
-        }
-
-        board.forEachNN(addToMap)
-        return map;
-        g
-    }
-
     flatten() {
         var board = this.Get();
         var ret = []

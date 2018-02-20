@@ -12,23 +12,17 @@
 //max manhattan distance for current agent
 class BoardToState {
 
-    constructor(board) {
-        this.board = board;
-        this.calculate()
-        return this.convertToState(id)
-    }
 
     static calculate(board) {
-        var totalpieces = BoardToState.countBoardPieces(board)
-        var rowpieces = BoardToState.countPiecesInRows(board)
-        var boardarray = board.Get()
+
+        var playedpieces = BoardToState.countBoardPieces(board)
+        var ret = {
+            "playedpieces": playedpieces,
+            "unplayedpieces": (board.height * board.width) - playedpieces
+        }
+        return ret;
     }
 
-    calculate() {
-        this.boardarr = this.board.Get()
-        this.boardpiecesnum = this.countBoardPieces();
-        this.rowpiecenumber = this.countPiecesInRows();
-    }
 
     //need to pass an id
     convertToStateObject(id) {
@@ -47,7 +41,22 @@ class BoardToState {
     }
 
     static countBoardPieces(board) {
-        return board.flatten().filter(Object).length
+        var barray = board.flatten()
+        return barray.filter(Object).length
+    }
+
+    static getMethods(obj) {
+        var result = [];
+        for (var id in obj) {
+            try {
+                if (typeof(obj[id]) == "function") {
+                    result.push(id + ": " + obj[id].toString());
+                }
+            } catch (err) {
+                result.push(id + ": inaccessible");
+            }
+        }
+        return result;
     }
 
     //Count # of pieces in columns and rows
@@ -63,36 +72,4 @@ class BoardToState {
         }
         return res
     }
-}
-
-
-class BoardToStateRepresentation {
-
-    constructor(board) {
-        this.board = board;
-        this.Get()
-    }
-
-    Get() {
-        this.totalpiececount = this.countBoardPieces(this.board)
-        this.openspots = this.board.flatten().length - this.totalpiececount
-    }
-
-    countBoardPieces() {
-        return BoardToStateRepresentation.countBoardPieces(this.getBoard())
-    }
-
-    getBoard() {
-        return this.board;
-    }
-
-    static countBoardPieces(board) {
-        return board.flatten().filter(Number).length
-    }
-
-    //count the number of pieces on a column
-    countBoardPiecesOnColumn(board, col) {
-        return 3
-    }
-
 }

@@ -5,18 +5,19 @@ class TTTExploration {
     //To Make a Random Choice, at Minimimum you need:
     //@return NewState
     //@Board Context
+    //PlaceMarker must be index 0. Need to do lookup by name
     static RandomChoice(context) {
 
         var board = context.getBoard()
         var boardsize = board.height * board.width
         var chosen = false;
-
+        var currentAgent = context.getCurrentAgent();
         var attempts = 0; //chosen just to ensure breakage. 
 
         while (chosen == false) { //go until a valid move
             attempts++; //for debugging
             var randomIdx = Math.floor(Math.random() * boardsize)
-            if (AgentTTTActions.PlaceMarker(context, randomIdx) || attempts > 30) {
+            if (currentAgent.executeAction(currentAgent.getActionByName("PlaceMarker"), {}, context, randomIdx) || attempts > 30) {
                 chosen = true;
             }
         }
