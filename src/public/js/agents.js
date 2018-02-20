@@ -19,15 +19,31 @@ function Agent(id, name, actionset, config = {}, mdp = {}, jointmdp = {}) {
     this.mdp = mdp; //each agent needs to keep track of it's own value map and qmatrix. That is because in certain games agents can have differnet policies. 	
     this.guid = guid();
     this.jointmdp = jointmdp; //joinmdp is the main mdp. 
+    this.actionmap = {}
+    this.genActionMap = function() {
+        for (var i = 0; i < this.actionset.length; i++) {
+            this.actionmap[this.actionset[i].name] = this.actionset[i]
+        }
+    }
+
+    this.genActionMap()
 }
 
 Agent.prototype.setActionHandler = function(actionhandler) {
     this.ActionHandler = actionhandler;
 }
+
 Agent.prototype.setActionSet = function(actions) {
     this.actionset = actions;
 }
 
+Agent.prototype.getActionByName = function(name) {
+    if (!this.actionmap.hasOwnProperty(name)) {
+        consoleError("Error. Could not find action. Returning")
+        return
+    }
+    return this.actionmap[name]
+}
 Agent.prototype.setMessageCost = function(cost) {
     this.messagecost = cost;
 }
@@ -90,9 +106,7 @@ Agent.prototype.ActHandler = function(action, stateprime) {
 
 //Exploration function returns a state which is stateprime. . 
 Agent.prototype.Explore = function(explorationfunction, context) {
-
     var stateprime = explorationfunction(context);
-
     return stateprime;
 }
 
@@ -113,16 +127,17 @@ Agent.prototype.Act = function(state, action, stateprime) {
     }
 }
 
-/*
-Updates the agents transition models. Need the indexed values of the matrix. 
-Alternative: Could rewrite the matrix as keys and then insert. 
-*/
-Agent.prototype.updateTransitionModel = function(state, action, stateprime) {
-    var tmat = this.mdp.qmatrix.tmat;
-    var jointtmat = this.mdp.qmatrix.tmat;
+Agent.prototype.updateTransitionModels = function(action, stateprime) {
 
-    this.mdp.qmatrix.tmat[state.id][action.id][stateprime.id] = tmat[state.id][action.id][stateprime.id] + 1;
-    this.jointmdp.qmatrix.tmat[state.id][action.id][stateprime.id] = this.jointmdp.qmatrix.tmat[state.id][action.id][stateprime.id] + 1;
+    var prevstate = this.getLastState();
+    var localtransitions = this.mdp.transitions;
+    var jointtransitions = this.jointmdp.transitions;
+
+    localtransitions.incrementModel(prevstate, action, stateprime)
+    jointtransitions.incrementModel(prevstate, action, stateprime)
+
+    console.log("Local transition model is " + JSON.stringify(localtransitions))
+
 }
 
 Agent.prototype.getLastState = function() {
@@ -146,19 +161,28 @@ Agent.prototype.setState = function(state) {
     this.state = state;
 }
 
-//Agent can have a noise factor associated with any action
-Agent.prototype.executeAction = function(action, context) {
-    this.currentaction = action; //needed so that the action index can be queried later. 
+//@Action object
+//@Params
+//Executes an action given an agent with a varied noise level
+Agent.prototype.executeAction = function(action, params) {
 
-    if (Math.random() <= context.noise && context.noise != 'undefined') {
-        //choose new action
-        var newaction = action;
-        while (newaction == action) {
-            newaction = this.chooseRandomAction()
+    var action_1 = action;
+    if (params.hasOwnProperty("noise")) {
+        if (Math.random() <= params.noise && this.actionset.length > 1) {
+            var count = 0;
+            while (action_1 == action) {
+                action_1 = this.chooseRandomAction()
+            }
         }
-        action = newaction;
+        action = action_1;
     }
-    action.action(context.game, context.agent);
+
+    var args = Array.prototype.slice.call(arguments, 2)
+    args = [action.action].concat(args)
+
+    var newstate = partial.apply(this, args)()
+    this.updateTransitionModels(action, newstate)
+
 }
 
 Agent.prototype.chooseRandomAction = function() {

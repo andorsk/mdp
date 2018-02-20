@@ -218,6 +218,14 @@ function testAssertEqual(given, expected, mm) {
     }
 }
 
+var partial = function(func) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return function() {
+        var allArguments = args.concat(Array.prototype.slice.call(arguments));
+        return func.apply(this, allArguments);
+    };
+};
+
 //loop through a multidimensional array
 //callback function takes (loc, val)
 Array.prototype.forEachNN = function(callback) {

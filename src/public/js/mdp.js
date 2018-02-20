@@ -52,6 +52,10 @@ class MDP {
     }
 
 
+    getStates() {
+        return this.states;
+    }
+
     getTransitions() {
         return this.transitions;
     }
@@ -65,15 +69,18 @@ class MDP {
         this.activeagents[agent.id] = true;
     }
 
+    getLastState() {
+        return this.states[this.states.length - 1]
+    }
+
     addState(state) {
         var v = JSON.stringify(state.getStateData())
+
         if (!this.statelookup.hasOwnProperty(v) && this.statelookup[v] != true) {
             state.setId(this.states.length)
             this.states.push(state); //update the arrays and qmatrix. 
             this.getTransitions().addState();
             this.addStateToLookup(state); //add it to the lookup
-        } else if (this.statelookup[v] == true) {
-            return this.statelookup[v]
         }
     }
 
@@ -122,7 +129,6 @@ class TransitionMatrices {
         this.addStateToTransitionArray();
     }
 
-    //update the q matrix with another state
     addStateToQMatrix() {
         var m = new Array(this.actions.length)
         for (var i = 0; i < m.length; i++) {
@@ -169,72 +175,8 @@ class TransitionMatrices {
         return sarray;
     }
 
-    //This will go through a number of iterations and call the correct approximation method in the exploration.js file. 
-    //Examples include: walk, MCMC, and A*. 
-    generateTransitionProbabilities() {
-        this.config.settings["approx_method"](this) //run the transtion probabilities
+    incrementModel(state, action, stateprime) {
+        this.qmatrix[state.id][action.id][stateprime.id]
+        this.transitionmatrix[state.id][stateprime.id]
     }
-
-    //Q Matrix has the probability of moving from one state to another given action a. Take that matrix and 
-    //convert it into a a probability matrix of s, s'
-    //Note: Need to update the code. This is hacky. IT will have to iterate through every entry in the matrix. 
-    //Column stochastic (i.e the probability outgoing on the column side.)
-    convertQMatToBasicProbabilityMatrix() {
-        var qmatrix = this.qmatrix;
-        var ret = this.generate3NestedArray(this.states, this.actions)
-
-        for (var i = 0; i < this.qmatrix.length; i++) {
-            for (var j = 0; j < this.qmatrix[i].length; j++) {
-                var total = 0;
-                var state_action = this.qmatrix[i][j];
-
-                for (var k = 0; k < state_action.length; k++) { //might be faster to keep a running total somewhere else on update function
-                    if (isNaN(state_action[k])) {
-                        total += state_action[k]
-                    }
-                }
-
-                for (var k = 0; k < state_action.length; k++) {
-                    if (isNaN(state_action[k])) {
-                        var probability = state_action[k] / total
-                        ret[i][j] = probability;
-                    }
-                }
-            }
-        }
-        return ret;
-    }
-
-
-    //Updates the qmatrix given a state, action, and stateprime
-    updateMatrix(state, action, stateprime, val) {
-        this.qmatrix[state.id][action.id][stateprime.id] = val;
-    }
-
-
-    //converts the iterated values into a probability distribution .
-    convertToQProbabilityMatrix() {
-        var qmatrix = this.qmatrix;
-        var ret = this.generate2NestedArray(this.states)
-
-        for (var i = 0; i < this.qmatrix.length; i++) {
-            var total = 0;
-            var state_action = this.qmatrix[i];
-
-            for (var j = 0; j < state_action.length; j++) { //might be faster to keep a running total somewhere else on update function
-                if (isNaN(state_action[j])) {
-                    total += state_action[j]
-                }
-            }
-
-            for (var k = 0; k < state_action.length; k++) {
-                if (isNaN(state_action[k])) {
-                    var probability = state_action[k] / total
-                    ret[i] = probability;
-                }
-            }
-        }
-        return ret;
-    }
-
 }

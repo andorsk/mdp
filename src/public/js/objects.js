@@ -14,12 +14,21 @@
 
      constructor(statedata, description = "") {
          this.statedata = statedata;
+         this.value = 0;
          this.description = description;
          this.converged = false;
      }
 
      setId(id) {
          this.id = id
+     }
+
+     setValue(val) {
+         this.value = val;
+     }
+
+     getValue() {
+         return this.value;
      }
 
      getStateData() {
