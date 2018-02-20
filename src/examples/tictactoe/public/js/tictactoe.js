@@ -71,11 +71,11 @@ function startGame() {
     var agents = initAgents(2, actions, states);
 
     markovmodel = new MDP(states, actions, agents, config)
-    var referencemodel = markovmodel.clone();
+    var referencemodel = clone(markovmodel)
     markovmodel.referencemodel = referencemodel;
 
     for (var i = 0; i < agents.length; i++) { //for each agent attach a mdp model;	
-        markovmodel.agents[i].mdp = markovmodel.clone();
+        markovmodel.agents[i].mdp = clone(markovmodel)
         markovmodel.agents[i].mdp.agents = [agents[i]]
         markovmodel.agents[i].jointmdp = markovmodel;
     }
@@ -83,7 +83,7 @@ function startGame() {
     //start the game
     consoleMessage("Starting the game")
     game = new GameEngine(markovmodel, renderconfig);
-    game.train(8);
+    game.train(1);
 
 }
 

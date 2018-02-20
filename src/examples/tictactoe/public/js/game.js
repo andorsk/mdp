@@ -28,6 +28,30 @@ function GameEngine(markovmodel, renderconfig) {
         return context;
     }
 
+    //Rewards are agent specific.
+    //If agent wins, then 1
+    //Tie = 0
+    //Lose = -1;
+    function getReward(res, agent) {
+        var reward;
+        switch (res) {
+            case "tie":
+                reward = 0;
+                break;
+            case agent.id:
+                reward = 1;
+                break;
+            case (isNaN(res) && res != agent.id):
+                reward = -1;
+                break;
+            default:
+                reward = 0;
+                break;
+        }
+        return reward;
+    }
+
+
     function playMarker(agent, markerid) {
         var placemarker = agent.actionset[0].action
         if (!placemarker(context, markerid)) {
@@ -35,12 +59,13 @@ function GameEngine(markovmodel, renderconfig) {
         }
 
         context.getRenderEngine().Update(context.getBoard())
-        checkEnd()
+        var reward = checkEnd()
         context.nextTurn()
     }
 
     function checkEnd() {
 
+        var reward = null;
         var result = TerminationEvaluator.checkTerminationStatus(context.getBoard())
         if (result != null) {
             var message = "";
@@ -52,6 +77,8 @@ function GameEngine(markovmodel, renderconfig) {
             context.terminate()
             sendMessage(renderconfig.selector, message)
         }
+
+        return getReward(result)
     }
 
     function playTurn() {

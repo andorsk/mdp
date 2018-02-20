@@ -66,51 +66,33 @@ class BoardToState {
 }
 
 
-static BoardToStateRepresentation(game) {
-    var board = game.board;
-    var markovmodel = game.markovmodel;
+class BoardToStateRepresentation {
 
-    console.log("Running Board To State Representation")
-    this.currentAgentID = markovmodel.agents[game.turnindex]
-    this.numofpieces = countBoardPieces(board)
-    this.amountofpiecesonleft = countBoardPiecesOnColumn(board, 0)
-    this.amountofpiecesinmiddle = countBoardPiecesOnColumn(board, 1)
-    this.amountofpiecesonright = countBoardPiecesOnColumn(board, 2)
-    this.minmanhattandistanceforopposingplayer = manhattanDistanceForPlayer(this.currentAgentID, board)[0] //TODO: Change current Agent ID to other agent ID. 
-    this.maxmanhattandistanceforopposingplayer = manhattanDistanceForPlayer(this.currentAgentID, board)[1]
-    this.avgmanhattandistanceforopposingplayer = manhattanDistanceForPlayer(this.currentAgentID, board)[2]
-
-    //returns the min, max, and average manhattan distance beween current players pieces as a tuple
-    function manhattanDistanceForPlayer(playerid, board) {
-        return [1, 1, 1]
+    constructor(board) {
+        this.board = board;
+        this.Get()
     }
 
-    //count the number of pieces on the board
-    function countBoardPieces(board) {
-        return board.flatten().filter(String).length
+    Get() {
+        this.totalpiececount = this.countBoardPieces(this.board)
+        this.openspots = this.board.flatten().length - this.totalpiececount
     }
 
-    this.countBoardPieces = function() {
-        return countBoardPieces(this.board)
+    countBoardPieces() {
+        return BoardToStateRepresentation.countBoardPieces(this.getBoard())
     }
+
+    getBoard() {
+        return this.board;
+    }
+
+    static countBoardPieces(board) {
+        return board.flatten().filter(Number).length
+    }
+
     //count the number of pieces on a column
-    function countBoardPiecesOnColumn(board, col) {
+    countBoardPiecesOnColumn(board, col) {
         return 3
     }
 
-    //adding state is a little different than the grid game because we don't know how many states there will be. We don't want to have redundant states. 
-    /* var strver = JSON.stringify(this)
-    if (markovmodel.statelookup.hasOwnProperty(strver)) { //make sure we haven't seen this state before. 
-      return markovmodel.statelookup[strver]
-    }*/
-    var state = new State(markovmodel.states.length, "State" + markovmodel.states.length, "test", "")
-    markovmodel.states.push(state); //create the state and push it. 
-    //markovmodel.statelookup[strver] = state
-    return state;
-
-}
-
-
-BoardToStateRepresentation.prototype.countBoardPieces = function(board) {
-    return board.flatten().filter(String).length
 }

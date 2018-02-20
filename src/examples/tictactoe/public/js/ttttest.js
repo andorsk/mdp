@@ -11,7 +11,56 @@ class TTTUnitTester {
         // this.TestTermination();
         this.TestLogic();
         this.TestBoard();
+        this.TestMDP()
     }
+}
+
+TTTUnitTester.TestMDP = function() {
+    runtests()
+
+    function runtests() {
+        console.log("Running MDP Tests")
+        addStateTest()
+    }
+
+    function addStateTest() {
+
+        var s1 = new State({
+            "id": 1
+        })
+
+        var s2 = new State({
+            "id2": 1
+        })
+
+        var agent = new Agent(0, "PlaceMarker", [donothing], "")
+        var mm = new MDP([s1, s2], [donothing])
+
+        function donothing() {
+            console.log("Doing nothing")
+        }
+
+        testAssertEqual(mm.getTransitions().qmatrix.length, 2, " Expected q matrix length to be 2. Got " + mm.getTransitions().qmatrix.length)
+
+        var s1 = new State({ //copy of state one shouldn't increase the state size.
+            "id": 1
+        })
+
+        testAssertEqual(mm.getTransitions().qmatrix.length, 2, " Expected q matrix length to be 2. Got " + mm.getTransitions().qmatrix.length)
+
+        var s3 = new State({
+            "id": 3
+        })
+
+        mm.addState(s3)
+
+        testAssertEqual(mm.getTransitions().qmatrix.length, 3, " Expected q matrix length to be 3. Got " + mm.getTransitions().qmatrix.length)
+    }
+
+}
+
+TTTUnitTester.TestBoardToState = function() {
+
 }
 
 
@@ -33,6 +82,7 @@ TTTUnitTester.TestBoard = function() {
         testAssertEqual(LogicEngine.JSONObjectEqual(arr, board), true, " Not equal expected " + arr + " Given " + board)
     }
 }
+
 
 TTTUnitTester.TestLogic = function() {
 
