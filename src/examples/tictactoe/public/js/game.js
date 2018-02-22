@@ -9,7 +9,10 @@ Game Engine is responsible for:
 The logic right now for checking bounds needs to eventually be updated. This was quick. 
 */
 function GameEngine(markovmodel, renderconfig) {
-    consoleMessage("Initializing Game Engine")
+
+    this.guid = guid()
+    console.log("-----------$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$----------------------")
+    consoleMessage("Initializing Game Engine " + this.guid)
 
     //Set up context
     var context = new GameContext()
@@ -79,9 +82,9 @@ function GameEngine(markovmodel, renderconfig) {
 
         var tick = 0;
         context.Reset();
+        console.log("Playing round")
         while (!context.isFinished()) {
             playTurn();
-
             if (tick > renderconfig.wblocks * renderconfig.hblocks) {
                 consoleError("Failed to Finish Game")
                 break;
@@ -92,12 +95,10 @@ function GameEngine(markovmodel, renderconfig) {
 
     function train(iter = 1000) {
         var tick = 1;
-
+        consoleMessage("INFO", "---------------------- Starting Game ----------------------- ")
         var tickiter = setInterval(function() {
             sendMessage(renderconfig.selector, "Round " + tick)
-            // playRound();
-            console.log("Playing turn")
-            playTurn()
+            playRound();
             tick++;
             console.log("Tick is " + tick)
             if (tick > iter) { //break 

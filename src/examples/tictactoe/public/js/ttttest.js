@@ -19,13 +19,15 @@ TTTUnitTester.TestMDP = function() {
     runtests()
 
     function runtests() {
-        console.log("Running MDP Tests")
+        consoleMessage("-------------------------------------------")
+        consoleMessage("INF0", "Running MDP Tests")
         addStateTest()
         probabilityTest()
     }
 
     function addStateTest() {
-        console.log("State adding test")
+        consoleMessage("-------------------------------------------")
+        consoleMessage("INFO", "Test for State to MDP")
         var s1 = new State({
             "id": 1
         })
@@ -92,8 +94,6 @@ TTTUnitTester.TestMDP = function() {
         var exp = agent.mdp.transitions.qmatrix[0][0][1]
         testAssertEqual(exp, 1, " Not equal expected " + 1 + " Given " + exp + " QMat is " + agent.mdp.transitions.qmatrix)
 
-
-
         agent.executeAction(action, {}, s1)
         agent.executeAction(action, {}, s2)
 
@@ -116,12 +116,12 @@ TTTUnitTester.TestBoard = function() {
     runtests()
 
     function runtests() {
-        console.log("Running tests for Board")
+        consoleMessage("-------------------------------------------")
+        consoleMessage("INFO", "Running tests for Board")
         iTestBoardCreation();
     }
 
     function iTestBoardCreation() {
-        consoleMessage("INFO", "Testing Board Creation")
         var board = new Board(5, 5).Get()
         var arr = new Array(5)
         for (var i = 0; i < arr.length; i++) {
@@ -137,6 +137,7 @@ TTTUnitTester.TestLogic = function() {
     runtests()
 
     function runtests() {
+        consoleMessage("-------------------------------------------")
         console.log("Running Logic Tests")
         iTestHomogeneousArrayChecker();
         iTestBorderMatrix()
@@ -286,6 +287,8 @@ TTTUnitTester.TestTermination = function() {
     runtests();
 
     function runtests() {
+        consoleMessage("-------------------------------------------")
+        consoleMessage("INFO", "Testing Termination")
         iTestFilled();
         iTest3ofAKind();
     }

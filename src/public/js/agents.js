@@ -133,6 +133,7 @@ Agent.prototype.Act = function(state, action, stateprime) {
 
 Agent.prototype.updateModel = function(action, stateprime) {
     this.updateTransitionModels(action, stateprime)
+    this.addNextState(stateprime, 1)
 }
 
 
@@ -143,7 +144,7 @@ Agent.prototype.updateTransitionModels = function(action, stateprime) {
     var jointmdp = this.jointmdp;
 
     localmdp.addTransition(prevstate, action, stateprime)
-    jointmdp.addTransition(prevstate, action, stateprime)
+    //  jointmdp.addTransition(prevstate, action, stateprime)
 }
 
 Agent.prototype.getLastState = function() {
@@ -187,18 +188,14 @@ Agent.prototype.executeAction = function(action, params) {
     args = [action.action].concat(args)
     var newstate = partial.apply(this, args)()
 
+    if (newstate == null) {
+        return null;
+    }
     this.updateModel(action, newstate)
-    this.addNextState(newstate, 1)
-
+    return newstate;
 }
 
 Agent.prototype.chooseRandomAction = function() {
     var index = Math.floor(Math.random() * this.actionset.length);
     return this.actionset[index]
 }
-/*
-There are a couple things to consider. Agents may have different policies. So each agent 
-can have a policy associated with it. 
-
-Each agent also has differnet actions. 
-*/

@@ -22,12 +22,11 @@ class TTTExploration {
             var newstate = currentAgent.executeAction(currentAgent.getActionByName("PlaceMarker"), {}, context, randomIdx)
 
             if (newstate != null || attempts > 30) {
-                console.log("flagged")
                 chosen = true;
             }
         }
 
-        return context.getBoard();
+        return newstate
     }
 
 

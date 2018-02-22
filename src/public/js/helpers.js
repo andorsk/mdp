@@ -208,7 +208,35 @@ function isNull(val) {
 }
 
 
+/** 
+ * From: https://gist.github.com/hyamamoto/fd435505d29ebfa3d9716fd2be8d42f0
+ * Returns a hash code for a string.
+ * (Compatible to Java's String.hashCode())
+ *
+ * The hash code for a string object is computed as
+ *     s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1]
+ * using number arithmetic, where s[i] is the i th character
+ * of the given string, n is the length of the string,
+ * and ^ indicates exponentiation.
+ * (The hash value of the empty string is zero.)
+ * 
+ * @param {string} s a string
+ * @return {number} a hash code value for the given string.
+ */
+function hashCode(s) {
+    var h = 0,
+        l = s.length,
+        i = 0;
+    if (l > 0)
+        while (i < l)
+            h = (h << 5) - h + s.charCodeAt(i++) | 0;
+    return h;
+};
+
+
+
 function testAssertEqual(given, expected, mm) {
+
     if (given != expected) {
         var m = "Given: " + given + " Expected: " + expected;
         if (message != null) {
@@ -239,7 +267,7 @@ Array.prototype.forEachNN = function(callback) {
 
 //is null or undefined
 function isNaU(object) {
-    if (object == 'undefined' || object == null) {
+    if (object == null) {
         return true;
     }
     return false;

@@ -54,7 +54,7 @@ class MDP {
 
     init(states, actions) {
         this.pushStates(states)
-        consoleMessage("INFO", "Done initializing MDP " + this.guid)
+        //consoleMessage("INFO", "Done initializing MDP " + this.guid)
     }
 
     pushStates(states) {
@@ -71,10 +71,6 @@ class MDP {
         return this.transitions;
     }
 
-    /**
-       Add an agent to the current markov model. 
-       @agent: an agent
-       */
     addAgent(agent) {
         this.agents.push(agent);
         this.activeagents[agent.id] = true;
@@ -85,20 +81,31 @@ class MDP {
     }
 
     addState(state) {
-        var v = JSON.stringify(state.getStateData())
 
-        if (!this.statelookup.hasOwnProperty(v) && this.statelookup[v] != true) {
+        if (state == null) {
+            consoleMessage("ERROR", "Trying to add state when it is null")
+            return
+        }
+
+        if (!this.stateEntered(state)) {
             state.setId(this.states.length)
             this.states.push(state); //update the arrays and qmatrix. 
             this.getTransitions().addState(state);
             this.addStateToLookup(state); //add it to the lookup
         }
+        return state;
+    }
 
+    stateEntered(state) {
+        var v = JSON.stringify(state.getStateData())
+        if (this.statelookup.hasOwnProperty(v) && this.statelookup[v] == true) {
+            return true;
+        } else return false;
     }
 
     addTransition(state, action, stateprime) {
-        this.addState(stateprime)
-        this.transitions.incrementModel(state, action, stateprime)
+        var sprim = this.addState(stateprime)
+        this.transitions.incrementModel(state, action, sprim)
     }
 
     addStateToLookup(state) {
@@ -141,7 +148,7 @@ class TransitionMatrices {
     }
 
     addState(state) {
-        this.addStateToQMatrix();
+        this.addStatesToQMatrix([state]);
     }
 
     addAction(action) {
@@ -149,9 +156,9 @@ class TransitionMatrices {
         this.equalizeQMatrixActions()
     }
 
-    addStateToQMatrix() {
-        var m = this.generate3NestedArray(new Array(1), this.actions)
-        this.qmatrix.push(m)
+    addStatesToQMatrix(states) {
+        var m = this.generate3NestedArray(states, this.actions)
+        this.qmatrix = this.qmatrix.concat(m)
         this.equalizeQMatrixStates()
     }
 
@@ -160,14 +167,15 @@ class TransitionMatrices {
     }
 
     equalizeQMatrixStates() {
+
         for (var i = 0; i < this.qmatrix.length; i++) {
             for (var j = 0; j < this.qmatrix[i].length; j++) {
-                var cur = this.qmatrix[i][j];
-                if (cur.length < this.states.length) {
-                    var lendif = this.states.length - cur.length;
-                    var appendedarray = new Array(lendif).fill(0)
-                    cur = cur.concat(appendedarray)
-                    this.qmatrix[i][j] = cur;
+                var stateprimearray = this.qmatrix[i][j];
+                if (stateprimearray.length < this.states.length) {
+                    var lendif = this.states.length - stateprimearray.length;
+                    var appendedarray = new Array(lendif).fill(0) //appended array is an Array(length) and cur is an Array(length)
+                    var newsparray = stateprimearray.concat(appendedarray);
+                    this.qmatrix[i][j] = newsparray;
                 }
             }
         }
@@ -213,26 +221,37 @@ class TransitionMatrices {
 
      initialized to 0
      */
-    generate3NestedArray(statespace, actionspace) {
-        var sarray = new Array(statespace.length)
-
-        for (var i = 0; i < sarray.length; i++) {
-            var a = new Array(actionspace.length);
-            for (var j = 0; j < a.length; j++) {
-                var sprimearr = new Array(statespace.length)
-                sprimearr.fill(0)
-                a[j] = sprimearr;
-            }
-            sarray[i] = a
+    generate3NestedArray(states, actions) {
+        if (isNaU(states) || isNaU(actions)) {
+            console.log("NAU")
+            return;
         }
-        return sarray;
+        var s = new Array(states.length)
+        for (var i = 0; i < s.length; i++) {
+            var a = new Array(actions.length);
+            for (var j = 0; j < a.length; j++) {
+                var sp = new Array(states.length)
+                sp.fill(0)
+                a[j] = sp;
+            }
+            s[i] = a;
+        }
+        return s;
     }
 
 
     incrementModel(state, action, stateprime) {
+
         if (isNaU(state) || isNaU(action) || isNaU(stateprime)) {
             return
         }
-        this.qmatrix[state.id][action.id][stateprime.id] += 1
+
+        try {
+            this.qmatrix[state.id][action.id][stateprime.id] += 1
+        } catch (err) {
+            if (err instanceof TypeError) {
+                throw (consoleError("ERROR", "Could not insert into Q Matrix " + JSON.stringify(this.qmatrix)))
+            }
+        }
     }
 }

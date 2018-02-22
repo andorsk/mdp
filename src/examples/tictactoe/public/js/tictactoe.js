@@ -6,7 +6,7 @@ var conf;
 $(document).ready(function() {
     console.log("Running tests")
     runTests();
-    // startGame();
+    startGame();
 })
 
 
@@ -83,7 +83,7 @@ function startGame() {
     //start the game
     consoleMessage("Starting the game")
     game = new GameEngine(markovmodel, renderconfig);
-    game.train(1);
+    //    game.train(1);
 
 }
 

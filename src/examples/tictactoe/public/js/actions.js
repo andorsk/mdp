@@ -14,8 +14,8 @@ class AgentTTTActions {
         board.setBoardValue(choiceloc[0], choiceloc[1], agent.id)
 
         var ret = BoardToState.calculate(board);
-        console.log("Returnning state " + ret)
-        return ret;
+
+        return new State(ret);
     }
 
     //must go to empty position
