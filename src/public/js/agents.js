@@ -188,7 +188,7 @@ Agent.prototype.executeAction = function(action, params) {
     args = [action.action].concat(args)
     var newstate = partial.apply(this, args)()
 
-    if (newstate == null) {
+    if (isNaU(newstate)) {
         return null;
     }
     this.updateModel(action, newstate)

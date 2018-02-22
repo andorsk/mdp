@@ -80,6 +80,8 @@ class MDP {
         return this.states[this.states.length - 1]
     }
 
+
+    //Right now state lookup is not optimal because each new state requires a lookup (right now twice)
     addState(state) {
 
         if (state == null) {
@@ -92,10 +94,15 @@ class MDP {
             this.states.push(state); //update the arrays and qmatrix. 
             this.getTransitions().addState(state);
             this.addStateToLookup(state); //add it to the lookup
+        } else {
+            state = getState(state)
         }
         return state;
     }
 
+    getState(state) {
+        return this.statelookup[state.getStateData()]
+    }
     stateEntered(state) {
         var v = JSON.stringify(state.getStateData())
         if (this.statelookup.hasOwnProperty(v) && this.statelookup[v] == true) {
@@ -104,12 +111,16 @@ class MDP {
     }
 
     addTransition(state, action, stateprime) {
+        if (stateprime == null) {
+            return;
+        }
         var sprim = this.addState(stateprime)
+        console.log("Moving to " + JSON.stringify(sprim))
         this.transitions.incrementModel(state, action, sprim)
     }
 
     addStateToLookup(state) {
-        this.statelookup[JSON.stringify(state.getStateData())] = true
+        this.statelookup[JSON.stringify(state.getStateData())] = state
     }
 
     pushExisitingStates() {
@@ -250,7 +261,7 @@ class TransitionMatrices {
             this.qmatrix[state.id][action.id][stateprime.id] += 1
         } catch (err) {
             if (err instanceof TypeError) {
-                throw (consoleError("ERROR", "Could not insert into Q Matrix " + JSON.stringify(this.qmatrix)))
+                throw (consoleError("ERROR", "Could not insert into Q Matrix " + JSON.stringify(this.qmatrix) + ":::" + JSON.stringify(state) + ":::::" + JSON.stringify(stateprime)))
             }
         }
     }
