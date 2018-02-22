@@ -17,6 +17,7 @@
          this.value = 0;
          this.description = description;
          this.converged = false;
+         this.id = null;
      }
 
      setId(id) {

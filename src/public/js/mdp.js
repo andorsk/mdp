@@ -17,20 +17,20 @@ See the config.js to generate a base config.
 class MDP {
 
     constructor(states = [], actions = [], agents = [], config = {}) {
-
-        this.states = states;
+        this.states = [];
+        this.statelookup = {}
         this.actions = actions;
         this.agents = agents;
         this.config = config;
-        this.activeagents = {}
-        this.id = guid()
+        this.guid = guid()
         this.approx_method = config.hasOwnProperty('approx_method') ? config.settings['approx_method'] : null;
-        this.statelookup = {}
-        this.pushExisitingStates();
+
         this.observationlikelihood = config.hasOwnProperty('observationlikeliehood') ? config.settings['observationlikeliehood'] : null;
         this.policymap = {}; //for each state there must be a policy
+
         this.transitions = new TransitionMatrices(states, actions)
         this.transitionmatrixhistory = [] //storing the transition matrix history for debugging purposes. 
+
         //The observation function is the likeliehood of observing o when action a is taken to transitoin to s'.
         this.observationmatrix;
         this.observationmatrixhistory = [];
@@ -49,8 +49,19 @@ class MDP {
 
         //Messsage are the sum of atomic messages sent by agent i 
         this.messages = []
+        this.init(states, actions)
     }
 
+    init(states, actions) {
+        this.pushStates(states)
+        consoleMessage("INFO", "Done initializing MDP " + this.guid)
+    }
+
+    pushStates(states) {
+        for (var i = 0; i < states.length; i++) {
+            this.addState(states[i])
+        }
+    }
 
     getStates() {
         return this.states;
@@ -79,9 +90,15 @@ class MDP {
         if (!this.statelookup.hasOwnProperty(v) && this.statelookup[v] != true) {
             state.setId(this.states.length)
             this.states.push(state); //update the arrays and qmatrix. 
-            this.getTransitions().addState();
+            this.getTransitions().addState(state);
             this.addStateToLookup(state); //add it to the lookup
         }
+
+    }
+
+    addTransition(state, action, stateprime) {
+        this.addState(stateprime)
+        this.transitions.incrementModel(state, action, stateprime)
     }
 
     addStateToLookup(state) {
@@ -90,7 +107,7 @@ class MDP {
 
     pushExisitingStates() {
         for (var i = 0; i < this.states.length; i++) {
-            this.statelookup[JSON.stringify(this.states[i].getStateData())] = true;
+            this.addState(this.states[i])
         }
     }
 
@@ -120,26 +137,58 @@ class TransitionMatrices {
     constructor(states, actions) {
         this.states = states;
         this.actions = actions;
-        this.qmatrix = this.generate3NestedArray(states, actions)
-        this.transitionmatrix = this.generate2NestedArray(states)
+        this.qmatrix = []
     }
 
-    addState() {
+    addState(state) {
         this.addStateToQMatrix();
-        this.addStateToTransitionArray();
+    }
+
+    addAction(action) {
+        this.actions.push(action)
+        this.equalizeQMatrixActions()
     }
 
     addStateToQMatrix() {
-        var m = new Array(this.actions.length)
-        for (var i = 0; i < m.length; i++) {
-            m[i] = new Array(this.states.length)
-        }
+        var m = this.generate3NestedArray(new Array(1), this.actions)
         this.qmatrix.push(m)
+        this.equalizeQMatrixStates()
+    }
+
+    equalizeQMatrixActions() {
+        consoleError("Not Available", "The current method equalizeQMatrixActions is not available")
+    }
+
+    equalizeQMatrixStates() {
+        for (var i = 0; i < this.qmatrix.length; i++) {
+            for (var j = 0; j < this.qmatrix[i].length; j++) {
+                var cur = this.qmatrix[i][j];
+                if (cur.length < this.states.length) {
+                    var lendif = this.states.length - cur.length;
+                    var appendedarray = new Array(lendif).fill(0)
+                    cur = cur.concat(appendedarray)
+                    this.qmatrix[i][j] = cur;
+                }
+            }
+        }
     }
 
     addStateToTransitionArray() {
         for (var i = 0; i < this.transitionmatrix.length; i++) {
-            this.transitionmatrix[i] = this.transitionmatrix[i].push([])
+            this.transitionmatrix[i] = this.transitionmatrix[i].push(new Array(1))
+        }
+    }
+
+    convertQMatrixToTransitionArray() {
+        var ret = generate2NestedArray(this.qmatrix)
+
+        for (var i = 0; i < this.qmatrix.length; i++) {
+            for (var j = 0; j < this.qmatrix[i].length; j++) {
+                for (var k = 0; k < this.qmatrix[i][j]; k++) {
+                    ret[i][k] += this.qmatrix[i][j][k]
+                }
+            }
+
         }
     }
 
@@ -161,22 +210,29 @@ class TransitionMatrices {
             a      
      We have a choice to store it as a 3x3 matrix or nested map.
      Size is state * action * state' 
+
+     initialized to 0
      */
     generate3NestedArray(statespace, actionspace) {
         var sarray = new Array(statespace.length)
 
-        //transition space is [s][a][s'] 
         for (var i = 0; i < sarray.length; i++) {
-            sarray[i] = new Array(actionspace.length);
-            for (var j = 0; j < actionspace.length; j++) {
-                sarray[i][i] = new Array(statespace.length);
+            var a = new Array(actionspace.length);
+            for (var j = 0; j < a.length; j++) {
+                var sprimearr = new Array(statespace.length)
+                sprimearr.fill(0)
+                a[j] = sprimearr;
             }
+            sarray[i] = a
         }
         return sarray;
     }
 
+
     incrementModel(state, action, stateprime) {
-        this.qmatrix[state.id][action.id][stateprime.id]
-        this.transitionmatrix[state.id][stateprime.id]
+        if (isNaU(state) || isNaU(action) || isNaU(stateprime)) {
+            return
+        }
+        this.qmatrix[state.id][action.id][stateprime.id] += 1
     }
 }

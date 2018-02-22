@@ -219,6 +219,7 @@ function testAssertEqual(given, expected, mm) {
 }
 
 var partial = function(func) {
+
     var args = Array.prototype.slice.call(arguments, 1);
     return function() {
         var allArguments = args.concat(Array.prototype.slice.call(arguments));
@@ -234,6 +235,14 @@ Array.prototype.forEachNN = function(callback) {
             callback([i, j], this[i][j])
         }
     }
+}
+
+//is null or undefined
+function isNaU(object) {
+    if (object == 'undefined' || object == null) {
+        return true;
+    }
+    return false;
 }
 
 Array.prototype.unique = function() {

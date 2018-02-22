@@ -78,6 +78,10 @@ Agent.prototype.getLastState = function() {
 
 //add a state with a timestep of t+1 to the highest timestep. 
 Agent.prototype.addNextState = function(state, timestep) {
+    if (Object.keys(this.history).length < 1) {
+        this.addState(state, timestep)
+        return
+    }
     var lasttimestamp = Object.keys(this.history).reduce(function(a, b) {
         return this.history[a] > this.history[b] ? a : b
     });
@@ -127,22 +131,24 @@ Agent.prototype.Act = function(state, action, stateprime) {
     }
 }
 
+Agent.prototype.updateModel = function(action, stateprime) {
+    this.updateTransitionModels(action, stateprime)
+}
+
+
 Agent.prototype.updateTransitionModels = function(action, stateprime) {
 
     var prevstate = this.getLastState();
-    var localtransitions = this.mdp.transitions;
-    var jointtransitions = this.jointmdp.transitions;
+    var localmdp = this.mdp;
+    var jointmdp = this.jointmdp;
 
-    localtransitions.incrementModel(prevstate, action, stateprime)
-    jointtransitions.incrementModel(prevstate, action, stateprime)
-
-    console.log("Local transition model is " + JSON.stringify(localtransitions))
-
+    localmdp.addTransition(prevstate, action, stateprime)
+    jointmdp.addTransition(prevstate, action, stateprime)
 }
 
 Agent.prototype.getLastState = function() {
 
-    if (!(this.history.length > 0)) {
+    if (Object.keys(this.history).length < 1) {
         return null
     }
     var lasttimestamp = Object.keys(this.history).reduce(function(a, b) {
@@ -179,9 +185,10 @@ Agent.prototype.executeAction = function(action, params) {
 
     var args = Array.prototype.slice.call(arguments, 2)
     args = [action.action].concat(args)
-
     var newstate = partial.apply(this, args)()
-    this.updateTransitionModels(action, newstate)
+
+    this.updateModel(action, newstate)
+    this.addNextState(newstate, 1)
 
 }
 
