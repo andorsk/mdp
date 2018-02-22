@@ -6,7 +6,7 @@ var conf;
 $(document).ready(function() {
     console.log("Running tests")
     runTests();
-    startGame();
+    // startGame();
 })
 
 
@@ -93,6 +93,8 @@ function initAgents(num, actions) {
         var agent = new Agent(id = i + 1, name = "Player " + (i + 1), actionset = actions, config = {
             "noise": .25
         })
+
+        agent.Explore(AgentTTTActions.NullState)
         agents.push(agent);
     }
     return agents;
@@ -101,5 +103,6 @@ function initAgents(num, actions) {
 
 function initActions() {
     var a = new Action(0, "PlaceMarker", action = AgentTTTActions.PlaceMarker, "Agent Will Place Marker");
-    return [a]
+    var a1 = new Action(1, "NullState", action = AgentTTTActions.NullState, "The Null State");
+    return [a, a1]
 }

@@ -14,13 +14,19 @@ class TTTExploration {
         var currentAgent = context.getCurrentAgent();
         var attempts = 0; //chosen just to ensure breakage. 
 
+        var oldstate = currentAgent.getLastState()
+
         while (chosen == false) { //go until a valid move
             attempts++; //for debugging
             var randomIdx = Math.floor(Math.random() * boardsize)
-            if (currentAgent.executeAction(currentAgent.getActionByName("PlaceMarker"), {}, context, randomIdx) || attempts > 30) {
+            var newstate = currentAgent.executeAction(currentAgent.getActionByName("PlaceMarker"), {}, context, randomIdx)
+
+            if (newstate != null || attempts > 30) {
+                console.log("flagged")
                 chosen = true;
             }
         }
+
         return context.getBoard();
     }
 

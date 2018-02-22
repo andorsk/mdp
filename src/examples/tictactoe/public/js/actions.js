@@ -13,7 +13,9 @@ class AgentTTTActions {
         var choiceloc = board.indexToBoard(markerid);
         board.setBoardValue(choiceloc[0], choiceloc[1], agent.id)
 
-        return BoardToState.calculate(board);
+        var ret = BoardToState.calculate(board);
+        console.log("Returnning state " + ret)
+        return ret;
     }
 
     //must go to empty position
@@ -22,5 +24,13 @@ class AgentTTTActions {
             return true;
         }
         return false;
+    }
+
+    static NullState() {
+        return new State()
+    }
+
+    static ForceState(state) {
+        return state;
     }
 }

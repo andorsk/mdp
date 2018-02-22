@@ -20,6 +20,7 @@ class BoardToState {
             "playedpieces": playedpieces,
             "unplayedpieces": (board.height * board.width) - playedpieces
         }
+        consoleMessage("Returning ret" + ret)
         return ret;
     }
 

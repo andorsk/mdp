@@ -71,6 +71,7 @@ function GameEngine(markovmodel, renderconfig) {
         renderengine.Update();
         checkEnd();
         context.nextTurn();
+
     }
 
 
@@ -78,7 +79,6 @@ function GameEngine(markovmodel, renderconfig) {
 
         var tick = 0;
         context.Reset();
-
         while (!context.isFinished()) {
             playTurn();
 
@@ -95,8 +95,9 @@ function GameEngine(markovmodel, renderconfig) {
 
         var tickiter = setInterval(function() {
             sendMessage(renderconfig.selector, "Round " + tick)
-            playRound();
-
+            // playRound();
+            console.log("Playing turn")
+            playTurn()
             tick++;
             console.log("Tick is " + tick)
             if (tick > iter) { //break 
@@ -230,7 +231,6 @@ class TerminationEvaluator {
     clearResults() {
         this.results = null;
     }
-
 
     static checkTerminationStatus(board) {
 

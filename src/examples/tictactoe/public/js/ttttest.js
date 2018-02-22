@@ -21,24 +21,26 @@ TTTUnitTester.TestMDP = function() {
     function runtests() {
         console.log("Running MDP Tests")
         addStateTest()
+        probabilityTest()
     }
 
     function addStateTest() {
-
+        console.log("State adding test")
         var s1 = new State({
             "id": 1
         })
 
         var s2 = new State({
-            "id2": 1
+            "id": 2
         })
 
-        var agent = new Agent(0, "PlaceMarker", [donothing], "")
-        var mm = new MDP([s1, s2], [donothing])
 
         function donothing() {
             console.log("Doing nothing")
         }
+
+        var agent = new Agent(0, "PlaceMarker", [donothing], "")
+        var mm = new MDP([s1, s2], [new Action(0, "Do nothing", donothing)])
 
         testAssertEqual(mm.getTransitions().qmatrix.length, 2, " Expected q matrix length to be 2. Got " + mm.getTransitions().qmatrix.length)
 
@@ -52,11 +54,57 @@ TTTUnitTester.TestMDP = function() {
             "id": 3
         })
 
-        mm.addState(s3)
 
+        mm.addState(s3)
         testAssertEqual(mm.getTransitions().qmatrix.length, 3, " Expected q matrix length to be 3. Got " + mm.getTransitions().qmatrix.length)
     }
 
+    function probabilityTest() {
+        consoleMessage("INFO", "Starting Probability Test")
+        var s1 = new State({
+            "id": 1
+        })
+
+        var s2 = new State({
+            "id": 2
+        })
+
+
+        function donothing() {
+            return;
+        }
+
+
+        var action = new Action(0, "Force the State", AgentTTTActions.ForceState)
+        var agent = new Agent(0, "Action", [action], "")
+
+        var mm = new MDP([s1, s2], [action], [agent])
+        for (var i = 0; i < mm.agents.length; i++) { //for each agent attach a mdp model;	
+            mm.agents[i].mdp = new MDP([s1, s2], [action], [agent], {})
+            mm.agents[i].jointmdp = mm;
+        }
+
+        var context = {}
+        agent.executeAction(action, {}, s1)
+        agent.executeAction(action, {}, s2)
+
+        //s1 -> s2 means s1.id -> s2.id = 1
+        var exp = agent.mdp.transitions.qmatrix[0][0][1]
+        testAssertEqual(exp, 1, " Not equal expected " + 1 + " Given " + exp + " QMat is " + agent.mdp.transitions.qmatrix)
+
+
+
+        agent.executeAction(action, {}, s1)
+        agent.executeAction(action, {}, s2)
+
+        //s1 -> s2 -> s1 -> s2 means s2.id -> s1.id = 1 && s1.id -> s2.id = 2
+        var exp = agent.mdp.transitions.qmatrix[0][0][1]
+        testAssertEqual(exp, 2, " Not equal expected " + 2 + " Given " + exp + " QMat is " + agent.mdp.transitions.qmatrix)
+
+        var exp = agent.mdp.transitions.qmatrix[1][0][0]
+        testAssertEqual(exp, 1, " Not equal expected " + 1 + " Given " + exp + " QMat is " + agent.mdp.transitions.qmatrix)
+
+    }
 }
 
 TTTUnitTester.TestBoardToState = function() {
