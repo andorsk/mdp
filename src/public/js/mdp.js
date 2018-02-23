@@ -88,39 +88,41 @@ class MDP {
             consoleMessage("ERROR", "Trying to add state when it is null")
             return
         }
+        var scheck = this.getState(state)
 
-        if (!this.stateEntered(state)) {
+        if (scheck == null) {
             state.setId(this.states.length)
             this.states.push(state); //update the arrays and qmatrix. 
             this.getTransitions().addState(state);
             this.addStateToLookup(state); //add it to the lookup
         } else {
-            state = getState(state)
+            state = scheck;
         }
+
         return state;
     }
 
     getState(state) {
-        return this.statelookup[state.getStateData()]
-    }
-    stateEntered(state) {
-        var v = JSON.stringify(state.getStateData())
-        if (this.statelookup.hasOwnProperty(v) && this.statelookup[v] == true) {
-            return true;
-        } else return false;
+        if (state.getStateDataHash() in this.statelookup) {
+            return this.statelookup[state.getStateDataHash()]
+        } else {
+            return null;
+        }
     }
 
     addTransition(state, action, stateprime) {
-        if (stateprime == null) {
+        if (isNaU(state) || isNaU(action) || isNaU(stateprime)) {
             return;
         }
-        var sprim = this.addState(stateprime)
-        console.log("Moving to " + JSON.stringify(sprim))
-        this.transitions.incrementModel(state, action, sprim)
+        var state = this.getState(state)
+        var sprime = this.addState(stateprime)
+
+        this.transitions.incrementModel(state, action, sprime)
+
     }
 
     addStateToLookup(state) {
-        this.statelookup[JSON.stringify(state.getStateData())] = state
+        this.statelookup[state.getStateDataHash()] = state
     }
 
     pushExisitingStates() {
@@ -162,6 +164,9 @@ class TransitionMatrices {
         this.addStatesToQMatrix([state]);
     }
 
+    printQMatrix() {
+        return JSON.stringify(this.qmatrix)
+    }
     addAction(action) {
         this.actions.push(action)
         this.equalizeQMatrixActions()

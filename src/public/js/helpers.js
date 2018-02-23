@@ -224,6 +224,9 @@ function isNull(val) {
  * @return {number} a hash code value for the given string.
  */
 function hashCode(s) {
+    if (isNaU(s)) {
+        return null;
+    }
     var h = 0,
         l = s.length,
         i = 0;

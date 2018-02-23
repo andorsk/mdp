@@ -27,7 +27,9 @@ class AgentTTTActions {
     }
 
     static NullState() {
-        return new State()
+        return new State({
+            "id": "ns"
+        })
     }
 
     static ForceState(state) {

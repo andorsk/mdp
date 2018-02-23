@@ -111,6 +111,7 @@ Agent.prototype.ActHandler = function(action, stateprime) {
 //Exploration function returns a state which is stateprime. . 
 Agent.prototype.Explore = function(explorationfunction, context) {
     var stateprime = explorationfunction(context);
+
     return stateprime;
 }
 
@@ -144,7 +145,7 @@ Agent.prototype.updateTransitionModels = function(action, stateprime) {
     var jointmdp = this.jointmdp;
 
     localmdp.addTransition(prevstate, action, stateprime)
-    //  jointmdp.addTransition(prevstate, action, stateprime)
+    //jointmdp.addTransition(prevstate, action, stateprime)
 }
 
 Agent.prototype.getLastState = function() {

@@ -61,7 +61,7 @@ function startGame() {
     waitUntilScriptLoaded("js/config.js")
 
     var config = new Config("tictactoe", rules, settings)
-    var states = [new State()]
+    var states = []
 
     waitUntilScriptLoaded("/js/objects.js");
 
@@ -71,6 +71,7 @@ function startGame() {
     var agents = initAgents(2, actions, states);
 
     markovmodel = new MDP(states, actions, agents, config)
+    console.log("Creating markov model with null states")
 
     var referencemodel = clone(markovmodel)
     markovmodel.referencemodel = referencemodel;
@@ -78,6 +79,7 @@ function startGame() {
     for (var i = 0; i < agents.length; i++) { //for each agent attach a mdp model;	
         markovmodel.agents[i].mdp = new MDP(states, actions, agents, config)
         markovmodel.agents[i].jointmdp = markovmodel;
+        markovmodel.agents[i].Explore(AgentTTTActions.NullState)
     }
 
     //start the game
@@ -94,7 +96,8 @@ function initAgents(num, actions) {
             "noise": .25
         })
 
-        agent.Explore(AgentTTTActions.NullState)
+
+
         agents.push(agent);
     }
     return agents;

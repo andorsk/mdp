@@ -36,6 +36,9 @@
          return this.statedata;
      }
 
+     getStateDataHash() {
+         return hashCode(JSON.stringify(this.statedata))
+     }
      setName(name) {
          this.name = name;
      }
