@@ -79,13 +79,13 @@ function startGame() {
     for (var i = 0; i < agents.length; i++) { //for each agent attach a mdp model;	
         markovmodel.agents[i].mdp = new MDP(states, actions, agents, config)
         markovmodel.agents[i].jointmdp = markovmodel;
-        markovmodel.agents[i].Explore(AgentTTTActions.NullState)
     }
 
     //start the game
     consoleMessage("Starting the game")
     game = new GameEngine(markovmodel, renderconfig);
-    game.train(1);
+
+    //game.train(1);
 
 }
 
@@ -95,9 +95,6 @@ function initAgents(num, actions) {
         var agent = new Agent(id = i + 1, name = "Player " + (i + 1), actionset = actions, config = {
             "noise": .25
         })
-
-
-
         agents.push(agent);
     }
     return agents;

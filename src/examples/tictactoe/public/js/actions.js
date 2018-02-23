@@ -7,7 +7,7 @@ class AgentTTTActions {
         var board = context.getBoard();
 
         if (!AgentTTTActions.validMove(board, markerid)) {
-            consoleError("INVALID ACTION", "Trying to move into occuppied space")
+            consoleError("INVALID ACTION", "Trying to move into occuppied space", false)
             return null;
         }
         var choiceloc = board.indexToBoard(markerid);
@@ -27,6 +27,7 @@ class AgentTTTActions {
     }
 
     static NullState() {
+
         return new State({
             "id": "ns"
         })

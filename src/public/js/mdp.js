@@ -28,7 +28,7 @@ class MDP {
         this.observationlikelihood = config.hasOwnProperty('observationlikeliehood') ? config.settings['observationlikeliehood'] : null;
         this.policymap = {}; //for each state there must be a policy
 
-        this.transitions = new TransitionMatrices(states, actions)
+        this.transitions = new TransitionMatrices(this.states, this.actions)
         this.transitionmatrixhistory = [] //storing the transition matrix history for debugging purposes. 
 
         //The observation function is the likeliehood of observing o when action a is taken to transitoin to s'.
@@ -98,11 +98,11 @@ class MDP {
         } else {
             state = scheck;
         }
-
         return state;
     }
 
     getState(state) {
+        if (state == null) return null;
         if (state.getStateDataHash() in this.statelookup) {
             return this.statelookup[state.getStateDataHash()]
         } else {
@@ -111,14 +111,9 @@ class MDP {
     }
 
     addTransition(state, action, stateprime) {
-        if (isNaU(state) || isNaU(action) || isNaU(stateprime)) {
-            return;
-        }
         var state = this.getState(state)
         var sprime = this.addState(stateprime)
-
         this.transitions.incrementModel(state, action, sprime)
-
     }
 
     addStateToLookup(state) {
@@ -161,7 +156,7 @@ class TransitionMatrices {
     }
 
     addState(state) {
-        this.addStatesToQMatrix([state]);
+        this.addStateToQMatrix([state]);
     }
 
     printQMatrix() {
@@ -172,8 +167,8 @@ class TransitionMatrices {
         this.equalizeQMatrixActions()
     }
 
-    addStatesToQMatrix(states) {
-        var m = this.generate3NestedArray(states, this.actions)
+    addStateToQMatrix(state) {
+        var m = this.generate3NestedArray([state], this.actions, this.states)
         this.qmatrix = this.qmatrix.concat(m)
         this.equalizeQMatrixStates()
     }
@@ -237,16 +232,15 @@ class TransitionMatrices {
 
      initialized to 0
      */
-    generate3NestedArray(states, actions) {
+    generate3NestedArray(states, actions, stateprime) {
         if (isNaU(states) || isNaU(actions)) {
-            console.log("NAU")
             return;
         }
         var s = new Array(states.length)
         for (var i = 0; i < s.length; i++) {
             var a = new Array(actions.length);
             for (var j = 0; j < a.length; j++) {
-                var sp = new Array(states.length)
+                var sp = new Array(stateprime.length)
                 sp.fill(0)
                 a[j] = sp;
             }
@@ -261,13 +255,18 @@ class TransitionMatrices {
         if (isNaU(state) || isNaU(action) || isNaU(stateprime)) {
             return
         }
-
         try {
-            this.qmatrix[state.id][action.id][stateprime.id] += 1
+
+            this.qmatrix[state.id][action.id][stateprime.id] += 1 // this.qmatrix[state.id][action.id][stateprime.id]
+
+            //      val = val + 1;
+            //    this.qmatrix[state.id][action.id][stateprime.id] = val
+
         } catch (err) {
             if (err instanceof TypeError) {
                 throw (consoleError("ERROR", "Could not insert into Q Matrix " + JSON.stringify(this.qmatrix) + ":::" + JSON.stringify(state) + ":::::" + JSON.stringify(stateprime)))
             }
         }
+
     }
 }

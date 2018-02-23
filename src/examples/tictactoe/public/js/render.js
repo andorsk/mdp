@@ -170,6 +170,7 @@ function TTTRenderEngine(renderconfig) {
     this.Reset = function() {
         this.board.Reset();
         this.Update();
+        sendMessage(renderconfig.selector, "")
     }
 
     this.Start = function() {

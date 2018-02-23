@@ -315,8 +315,12 @@ function testErrorMessage(type, message) {
     consoleError(type, message)
 }
 
-function consoleError(type, message) {
-    console.error("Error: " + Date.now() + " Type:" + type + "  Message: " + message);
+function consoleError(type, message, showtime = true) {
+    if (showtime) {
+        console.error("Error: " + Date.now() + " Type:" + type + "  Message: " + message);
+    } else {
+        console.error("Error Type:" + type + "  Message: " + message);
+    }
 }
 
 /**

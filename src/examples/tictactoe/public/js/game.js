@@ -23,6 +23,7 @@ function GameEngine(markovmodel, renderconfig) {
     context.setMarkovModel(markovmodel)
     this.context = context;
 
+    startPlayers();
     this.getContext = function() {
         return getContext();
     }
@@ -31,6 +32,15 @@ function GameEngine(markovmodel, renderconfig) {
         return context;
     }
 
+    this.startPlayers = function() {
+        startPlayers()
+    }
+
+    function startPlayers() {
+        for (var i = 0; i < context.getMarkovModel().agents.length; i++) {
+            context.getMarkovModel().agents[i].executeAction(context.getMarkovModel().agents[i].getActionByName("NullState"))
+        }
+    }
     //Rewards are agent specific.
     //If agent wins, then 1
     //Tie = 0
@@ -76,7 +86,6 @@ function GameEngine(markovmodel, renderconfig) {
         context.nextTurn();
 
     }
-
 
     function playRound() {
 
@@ -182,6 +191,7 @@ class GameContext {
     setTurn(turn) {
         this.turnindex = turn;
     }
+
     //clears the entire context
     Clear() {
         this.renderengine = null;
@@ -196,6 +206,8 @@ class GameContext {
         this.isfinished = false;
         this.setTurn(0)
     }
+
+
 
     getCurrentAgent() {
         return markovmodel.agents[this.getTurn()]

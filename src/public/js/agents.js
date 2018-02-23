@@ -111,7 +111,6 @@ Agent.prototype.ActHandler = function(action, stateprime) {
 //Exploration function returns a state which is stateprime. . 
 Agent.prototype.Explore = function(explorationfunction, context) {
     var stateprime = explorationfunction(context);
-
     return stateprime;
 }
 
@@ -145,7 +144,7 @@ Agent.prototype.updateTransitionModels = function(action, stateprime) {
     var jointmdp = this.jointmdp;
 
     localmdp.addTransition(prevstate, action, stateprime)
-    //jointmdp.addTransition(prevstate, action, stateprime)
+    jointmdp.addTransition(prevstate, action, stateprime)
 }
 
 Agent.prototype.getLastState = function() {
@@ -172,7 +171,7 @@ Agent.prototype.setState = function(state) {
 //@Action object
 //@Params
 //Executes an action given an agent with a varied noise level
-Agent.prototype.executeAction = function(action, params) {
+Agent.prototype.executeAction = function(action, params = {}) {
 
     var action_1 = action;
     if (params.hasOwnProperty("noise")) {
@@ -189,9 +188,11 @@ Agent.prototype.executeAction = function(action, params) {
     args = [action.action].concat(args)
     var newstate = partial.apply(this, args)()
 
+
     if (isNaU(newstate)) {
         return null;
     }
+
     this.updateModel(action, newstate)
     return newstate;
 }
