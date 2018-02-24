@@ -88,16 +88,18 @@ class MDP {
             consoleMessage("ERROR", "Trying to add state when it is null")
             return
         }
+
         var scheck = this.getState(state)
 
         if (scheck == null) {
-            state.setId(this.states.length)
+            state.setReferenceIndex(this.guid, this.states.length)
             this.states.push(state); //update the arrays and qmatrix. 
             this.getTransitions().addState(state);
             this.addStateToLookup(state); //add it to the lookup
         } else {
             state = scheck;
         }
+
         return state;
     }
 
@@ -113,7 +115,10 @@ class MDP {
     addTransition(state, action, stateprime) {
         var state = this.getState(state)
         var sprime = this.addState(stateprime)
-        this.transitions.incrementModel(state, action, sprime)
+        if (isNaU(state) || isNaU(sprime)) {
+            return
+        }
+        this.transitions.incrementModelIndex(state.getReferenceIndex(this.guid), action.id, sprime.getReferenceIndex(this.guid))
     }
 
     addStateToLookup(state) {
@@ -249,6 +254,19 @@ class TransitionMatrices {
         return s;
     }
 
+    incrementModelIndex(state, action, stateprime) {
+
+        if (isNaU(state) || isNaU(action) || isNaU(stateprime)) {
+            return
+        }
+        try {
+            this.qmatrix[stateid][actionid][stateprimeid] += 1
+        } catch (err) {
+            if (err instanceof TypeError) {
+                throw (consoleError("ERROR", "Could not insert into Q Matrix " + JSON.stringify(this.qmatrix) + ":::" + JSON.stringify(state) + ":::::" + JSON.stringify(stateprime)))
+            }
+        }
+    }
 
     incrementModel(state, action, stateprime) {
 
@@ -256,12 +274,8 @@ class TransitionMatrices {
             return
         }
         try {
-
-            this.qmatrix[state.id][action.id][stateprime.id] += 1 // this.qmatrix[state.id][action.id][stateprime.id]
-
-            //      val = val + 1;
-            //    this.qmatrix[state.id][action.id][stateprime.id] = val
-
+            console.log("This GUID IS " + this.guid)
+            this.qmatrix[state.getReferenceIndex(this.guid)][action.id][stateprime.getReferenceIndex(this.guid)] += 1
         } catch (err) {
             if (err instanceof TypeError) {
                 throw (consoleError("ERROR", "Could not insert into Q Matrix " + JSON.stringify(this.qmatrix) + ":::" + JSON.stringify(state) + ":::::" + JSON.stringify(stateprime)))

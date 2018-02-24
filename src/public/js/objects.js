@@ -18,10 +18,23 @@
          this.description = description;
          this.converged = false;
          this.id = null;
+         this.ref = {}
      }
 
      setId(id) {
          this.id = id
+     }
+
+     setReferenceIndex(guid, index) {
+         this.ref[guid] = index
+     }
+
+     getReferenceIndex(guid) {
+         return this.ref[guid]
+     }
+
+     clone() {
+         return $.extend(true, {}, this)
      }
 
      setValue(val) {
